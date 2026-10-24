@@ -208,10 +208,6 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
         referenceId: data.referenceId,
         message: data.message
       });
-
-      // Switch to blueprint view to inspect confirmed dossier
-      setActiveTab('blueprint');
-
     } catch (err: any) {
       console.error('Lead submission failure:', err);
       setSubmissionError(
