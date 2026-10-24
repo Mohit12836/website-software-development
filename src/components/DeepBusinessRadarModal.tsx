@@ -143,10 +143,10 @@ export const DeepBusinessRadarModal: React.FC<DeepBusinessRadarModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-[0_25px_70px_rgba(0,0,0,0.35)] border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-[0_25px_70px_rgba(0,0,0,0.35)] border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
         
         {/* Top Header Bar */}
-        <div className="px-5 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+        <div className="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-slate-950 font-black text-sm">
               <Sparkles className="w-4 h-4 text-slate-950" />
@@ -176,65 +176,78 @@ export const DeepBusinessRadarModal: React.FC<DeepBusinessRadarModalProps> = ({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-5">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           
           {/* =========================================================================
-              PART 1: SLIDE-BY-SLIDE DIAGNOSIS (One Question at a Time)
+              PART 1: SLIDE-BY-SLIDE DIAGNOSIS (One Question at a Time, Side-by-Side Cards)
               ========================================================================= */}
           {!isFinalVerdictScreen && currentSlide && (
-            <div className="space-y-5 animate-in fade-in duration-200">
+            <div className="space-y-4 animate-in fade-in duration-200">
               
               {/* Question Header */}
               <div>
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-600 block mb-1">
+                <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-amber-600 block mb-0.5">
                   {currentSlide.category}
                 </span>
-                <h3 className="text-lg sm:text-2xl font-black text-slate-950 leading-tight">
+                <h3 className="text-base sm:text-xl font-black text-slate-950 leading-tight">
                   {currentSlide.question}
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-600 mt-1 font-medium">
+                <p className="text-xs text-slate-600 mt-0.5 font-medium">
                   {currentSlide.subtitle}
                 </p>
               </div>
 
-              {/* Options Grid */}
-              <div className="grid grid-cols-1 gap-2.5 pt-1">
+              {/* Responsive Side-by-Side Cards Grid (2 to 4 columns, NO unnecessary vertical scrolling) */}
+              <div className={`grid gap-2.5 pt-1 ${
+                currentSlide.options.length <= 3 
+                  ? 'grid-cols-1 sm:grid-cols-3' 
+                  : currentSlide.options.length === 4
+                  ? 'grid-cols-1 sm:grid-cols-2'
+                  : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
+              }`}>
                 {currentSlide.options.map((opt) => {
                   const isSelected = selections[currentSlide.id] === opt.id;
                   return (
                     <div
                       key={opt.id}
                       onClick={() => handleSelectOption(currentSlide, opt)}
-                      className={`p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-start justify-between select-none ${
+                      className={`p-3.5 sm:p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex flex-col justify-between select-none relative group ${
                         isSelected 
                           ? 'border-emerald-600 bg-emerald-50 text-emerald-950 shadow-md ring-1 ring-emerald-600 selected-pop-green' 
-                          : 'border-slate-200 hover:border-slate-300 bg-white text-slate-900 hover:bg-slate-50'
+                          : 'border-slate-200 hover:border-slate-300 bg-white text-slate-900 hover:bg-slate-50 shadow-sm'
                       }`}
                     >
-                      <div className="flex items-start gap-3 min-w-0 pr-2">
-                        {opt.icon && (
-                          <span className="text-xl sm:text-2xl shrink-0 mt-0.5">
-                            {opt.icon}
-                          </span>
-                        )}
-                        <div>
-                          <div className={`text-xs sm:text-sm leading-snug ${
-                            isSelected ? 'font-black text-emerald-950' : 'font-bold text-slate-950'
-                          }`}>
-                            {opt.label}
-                          </div>
-                          {opt.sublabel && (
-                            <div className="text-[11px] text-slate-500 mt-0.5">
-                              {opt.sublabel}
-                            </div>
+                      <div>
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          {opt.icon && (
+                            <span className="text-2xl shrink-0">
+                              {opt.icon}
+                            </span>
                           )}
+                          <div className={`w-5 h-5 rounded-md flex items-center justify-center border-2 shrink-0 transition-colors duration-200 ${
+                            isSelected ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm' : 'border-slate-300 bg-slate-50'
+                          }`}>
+                            {isSelected && <CheckCircle2 className="w-3.5 h-3.5 stroke-[3]" />}
+                          </div>
                         </div>
+
+                        <div className={`text-xs sm:text-[13px] leading-snug ${
+                          isSelected ? 'font-black text-emerald-950' : 'font-extrabold text-slate-950'
+                        }`}>
+                          {opt.label}
+                        </div>
+
+                        {opt.sublabel && (
+                          <div className="text-[10px] sm:text-[11px] text-slate-500 mt-1 leading-snug">
+                            {opt.sublabel}
+                          </div>
+                        )}
                       </div>
 
-                      <div className={`w-5 h-5 rounded-md flex items-center justify-center border-2 shrink-0 mt-1 transition-colors duration-200 ${
-                        isSelected ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm' : 'border-slate-300 bg-slate-50'
-                      }`}>
-                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 stroke-[3]" />}
+                      <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold">
+                        <span className={isSelected ? 'text-emerald-700' : 'text-slate-400 group-hover:text-slate-700'}>
+                          {isSelected ? '✓ चयनित' : 'चुनें →'}
+                        </span>
                       </div>
                     </div>
                   );
@@ -243,14 +256,14 @@ export const DeepBusinessRadarModal: React.FC<DeepBusinessRadarModalProps> = ({
 
               {/* The Eye-Opening Mirror Insight (Dopamine / Reality Check) */}
               {activeMirrorInsight && (
-                <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 border-2 border-amber-300/80 text-amber-950 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50 border-2 border-amber-300/80 text-amber-950 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <div className="flex items-start gap-2.5">
-                    <AlertTriangle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+                    <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
                     <div>
-                      <span className="text-xs font-black uppercase tracking-wider text-amber-900 block mb-1">
+                      <span className="text-[11px] font-black uppercase tracking-wider text-amber-900 block mb-0.5">
                         आपके बिज़नेस की ज़मीनी सच्चाई:
                       </span>
-                      <p className="text-xs sm:text-sm font-semibold leading-relaxed text-slate-900">
+                      <p className="text-xs sm:text-[13px] font-semibold leading-relaxed text-slate-900">
                         "{activeMirrorInsight}"
                       </p>
                     </div>
