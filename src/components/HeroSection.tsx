@@ -16,11 +16,13 @@ interface HeroSectionProps {
   currency: 'INR' | 'USD';
   onExploreServices: () => void;
   onOpenConsultation: () => void;
+  onOpenDeepRadar?: () => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   onExploreServices,
-  onOpenConsultation
+  onOpenConsultation,
+  onOpenDeepRadar
 }) => {
   const [videoModalOpen, setVideoModalOpen] = useState(false);
 
@@ -73,26 +75,34 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
             {/* Dual Strategic Paths: 100% full width on small mobile, auto on sm+ */}
             <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3.5 w-full sm:w-auto">
-              <a
-                href="#solution-finder"
-                className="black-glass-btn-orbit group w-full sm:w-auto"
+              <button
+                type="button"
+                onClick={() => {
+                  if (onOpenDeepRadar) {
+                    onOpenDeepRadar();
+                  } else {
+                    onOpenConsultation();
+                  }
+                }}
+                className="black-glass-btn-orbit group w-full sm:w-auto text-left"
               >
                 <span className="btn-glass-inner w-full justify-center px-4 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm">
                   <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24] shrink-0"></span>
-                  <span className="text-white group-hover:text-amber-200 transition-colors font-bold">1. Find Your Solution (समाधान खोजें)</span>
+                  <span className="text-white group-hover:text-amber-200 transition-colors font-bold">आइए, बिज़नेस को समझते हैं (Reality Check)</span>
                   <ArrowRight className="w-3.5 h-3.5 text-amber-400 group-hover:translate-x-1 transition-transform shrink-0" />
                 </span>
-              </a>
+              </button>
 
-              <a
-                href="#demos"
+              <button
+                type="button"
+                onClick={onExploreServices}
                 className="glass-pill-dark px-4 py-2.5 sm:px-5 sm:py-3 rounded-full text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 hover:border-cyan-400/50 hover:bg-white/10 transition-all shadow-md w-full sm:w-auto"
               >
                 <div className="w-5 h-5 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center font-black text-xs shrink-0">
-                  <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
+                  <Zap className="w-2.5 h-2.5 fill-current ml-0.5" />
                 </div>
-                <span>2. Explore Live Demos (डेमो देखें)</span>
-              </a>
+                <span>समाधान व सर्विसेज देखें →</span>
+              </button>
             </div>
 
             {/* 6 Trust Check Badges: Clean 2-column grid with balanced mobile touch */}

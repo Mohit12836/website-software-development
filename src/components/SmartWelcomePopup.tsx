@@ -16,11 +16,13 @@ import type { ProjectBrief } from '../data/projectBriefState';
 
 interface SmartWelcomePopupProps {
   onOpenConsultationModal: (initialGoalOrIndustry?: string) => void;
+  onOpenDeepRadar?: () => void;
   currentBrief?: ProjectBrief;
 }
 
 export const SmartWelcomePopup: React.FC<SmartWelcomePopupProps> = ({
   onOpenConsultationModal,
+  onOpenDeepRadar,
   currentBrief
 }) => {
   // 'hidden': not rendered
@@ -130,43 +132,55 @@ export const SmartWelcomePopup: React.FC<SmartWelcomePopupProps> = ({
             {/* 4 Clear Guided Pathways */}
             <div className="p-5 sm:p-6 pt-2 space-y-2.5">
               <button
-                onClick={() => handleLaunchConsultation('New Website or Web App')}
-                className="w-full p-3.5 rounded-2xl border-2 border-slate-200 hover:border-amber-400 bg-white hover:bg-amber-50/40 text-left transition-all flex items-center justify-between group"
+                onClick={() => {
+                  handleDismissToDock();
+                  if (onOpenDeepRadar) {
+                    onOpenDeepRadar();
+                  } else {
+                    onOpenConsultationModal('Business Reality Check');
+                  }
+                }}
+                className="w-full p-4 rounded-2xl border-2 border-amber-400 bg-amber-50/50 hover:bg-amber-100/60 text-left transition-all flex items-center justify-between group shadow-sm"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-amber-100 flex items-center justify-center text-slate-700 group-hover:text-amber-800 transition-colors">
-                    <Sparkles className="w-4 h-4" />
+                  <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center shrink-0 shadow-sm">
+                    <Sparkles className="w-5 h-5 text-slate-950" />
                   </div>
                   <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-amber-900">
-                      Discuss My Project & Get Quotation
-                    </h4>
-                    <p className="text-[11px] text-slate-500">
-                      Structured 5-minute technical brief with human-approved proposal
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs sm:text-sm font-extrabold text-slate-950">
+                        आइए, आपके बिज़नेस को थोड़ा बेहतर समझते हैं
+                      </h4>
+                      <span className="px-1.5 py-0.2 rounded text-[8px] font-black uppercase bg-amber-400 text-slate-950">
+                        Live Check
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-700 mt-0.5 leading-snug">
+                      स्लाइड-बाय-स्लाइड देखिए आपका काम कहाँ फँसा है, सिस्टम कहाँ टूटा है और कमाई कहाँ लीक हो रही है।
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-amber-600 group-hover:translate-x-0.5 transition-all" />
+                <ArrowRight className="w-4 h-4 text-amber-700 group-hover:translate-x-1 transition-transform" />
               </button>
 
               <button
-                onClick={scrollToDemos}
-                className="w-full p-3.5 rounded-2xl border-2 border-slate-200 hover:border-blue-400 bg-white hover:bg-blue-50/40 text-left transition-all flex items-center justify-between group"
+                onClick={() => handleLaunchConsultation('New Website or Web App')}
+                className="w-full p-3.5 rounded-2xl border-2 border-slate-200 hover:border-slate-400 bg-white hover:bg-slate-50 text-left transition-all flex items-center justify-between group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center text-slate-700 group-hover:text-blue-800 transition-colors">
-                    <Layers className="w-4 h-4" />
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
+                    <FileText className="w-4 h-4" />
                   </div>
                   <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-blue-900">
-                      Explore Interactive Prototypes & Demos
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-900">
+                      सीधी बात: प्रोजेक्ट ब्रीफ व कोटेशन
                     </h4>
                     <p className="text-[11px] text-slate-500">
-                      Examine working layouts for restaurants, clinics, retail and B2B
+                      अगर आपकी रिक्वायरमेंट्स पहले से तय हैं, तो सीधा तकनीकी फॉर्म भरें
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all" />
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-all" />
               </button>
 
               <button

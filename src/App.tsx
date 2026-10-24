@@ -13,6 +13,7 @@ import { RoiCalculator } from './components/RoiCalculator';
 import { ReviewsSection } from './components/ReviewsSection';
 import { Footer } from './components/Footer';
 import { ConsultationModal } from './components/ConsultationModal';
+import { DeepBusinessRadarModal } from './components/DeepBusinessRadarModal';
 import { SmartWelcomePopup } from './components/SmartWelcomePopup';
 import { AiAuditModal } from './components/AiAuditModal';
 import { SearchModal } from './components/SearchModal';
@@ -31,6 +32,7 @@ export function App() {
   const [projectBrief, setProjectBrief] = useState<ProjectBrief>(INITIAL_PROJECT_BRIEF);
 
   // Modals state
+  const [radarModalOpen, setRadarModalOpen] = useState(false);
   const [consultationModalOpen, setConsultationModalOpen] = useState(false);
   const [consultationSubject, setConsultationSubject] = useState<string>('');
   const [auditModalOpen, setAuditModalOpen] = useState(false);
@@ -71,7 +73,7 @@ export function App() {
       {/* Main Content: Exact 9-Step Strategic Customer Journey */}
       <main className="flex-1 pb-16 sm:pb-0">
         
-        {/* 1. Premium Hero (2 Paths: Find Solution or Watch Demos) */}
+        {/* 1. Premium Hero (2 Paths: Reality Check or Explore Services) */}
         <HeroSection
           currency={currency}
           onExploreServices={() => {
@@ -79,6 +81,7 @@ export function App() {
             if (el) el.scrollIntoView({ behavior: 'smooth' });
           }}
           onOpenConsultation={() => handleOpenConsultation()}
+          onOpenDeepRadar={() => setRadarModalOpen(true)}
         />
 
         {/* 2. Find Your Solution (Vismart Smart Solution Finder / AI Advisor) */}
@@ -152,13 +155,21 @@ export function App() {
 
       {/* Native Mobile Bottom Navigation Bar */}
       <MobileBottomNav
-        onOpenConsultation={() => handleOpenConsultation()}
+        onOpenConsultation={() => setRadarModalOpen(true)}
       />
 
       {/* Smooth White Attractive Welcome Popup (Closes into floating side icon) */}
       <SmartWelcomePopup
         onOpenConsultationModal={(niche) => handleOpenConsultation(niche)}
+        onOpenDeepRadar={() => setRadarModalOpen(true)}
         currentBrief={projectBrief}
+      />
+
+      {/* Slide-by-Slide Deep Business Reality Check Radar Modal */}
+      <DeepBusinessRadarModal
+        isOpen={radarModalOpen}
+        onClose={() => setRadarModalOpen(false)}
+        currency={currency}
       />
 
       {/* Interactive Modals */}
