@@ -27,7 +27,7 @@ export const LiveDemosSection: React.FC<LiveDemosSectionProps> = ({
 
   const filters = ['All', 'Hospitality', 'Healthcare', 'E-commerce', 'Real Estate', 'Beauty', 'Web Applications'];
 
-  // Clearly differentiated prototypes and concept previews
+  // Clearly differentiated prototypes and concept previews (Crystal-Clear 1200px Resolution)
   const demos: LiveDemoItem[] = [
     {
       id: 'demo-restaurant',
@@ -35,7 +35,7 @@ export const LiveDemosSection: React.FC<LiveDemosSectionProps> = ({
       category: 'Hospitality',
       rating: 4.9,
       reviewsCount: 14,
-      image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=90',
       tag: 'Interactive Prototype',
       liveUrl: '',
       features: ['Digital QR Menu Layout', 'Table Reservation Form Funnel', 'Direct Location Map Routing']
@@ -46,7 +46,7 @@ export const LiveDemosSection: React.FC<LiveDemosSectionProps> = ({
       category: 'Healthcare',
       rating: 4.95,
       reviewsCount: 18,
-      image: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1200&q=90',
       tag: 'Interactive Prototype',
       liveUrl: '',
       features: ['Doctor Practitioner Profiles', 'Live Calendar Slot Selector', 'Pre-Consultation Intake Checklist']
@@ -57,7 +57,7 @@ export const LiveDemosSection: React.FC<LiveDemosSectionProps> = ({
       category: 'E-commerce',
       rating: 4.88,
       reviewsCount: 22,
-      image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=90',
       tag: 'Architecture Concept',
       liveUrl: '',
       features: ['Single-Page Express Checkout', 'UPI / Card Payment Gateway Integration', 'Dynamic Cart Counter & Discounts']
@@ -68,7 +68,7 @@ export const LiveDemosSection: React.FC<LiveDemosSectionProps> = ({
       category: 'Real Estate',
       rating: 4.92,
       reviewsCount: 9,
-      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=90',
       tag: 'Concept Preview',
       liveUrl: '',
       features: ['Floor Plan Visualizer', 'Gated PDF Project Brochure Download', 'VIP Site Visit Booking Funnel']
@@ -79,7 +79,7 @@ export const LiveDemosSection: React.FC<LiveDemosSectionProps> = ({
       category: 'Beauty',
       rating: 4.9,
       reviewsCount: 12,
-      image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=90',
       tag: 'Concept Preview',
       liveUrl: '',
       features: ['Specialist Stylist Selector', 'Transparent Service Card Pricing', 'Automated SMS/Email Notification Spec']
@@ -90,7 +90,7 @@ export const LiveDemosSection: React.FC<LiveDemosSectionProps> = ({
       category: 'Web Applications',
       rating: 4.97,
       reviewsCount: 16,
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=90',
       tag: 'Design Architecture',
       liveUrl: '',
       features: ['Role-Based Authentication (Admin/Staff)', 'Real-Time Pipeline Kanban', 'CSV / Excel Exportable Analytics']
@@ -138,52 +138,57 @@ export const LiveDemosSection: React.FC<LiveDemosSectionProps> = ({
           </div>
         </div>
 
-        {/* Demo Cards Grid */}
+        {/* Demo Cards Grid with Running Border Light Beam */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredDemos.map((demo) => (
             <div
               key={demo.id}
-              className="group bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+              className="group card-border-beam rounded-3xl p-[1.5px] shadow-sm hover:shadow-2xl transition-all duration-300"
             >
-              <div>
-                <div className="relative h-48 overflow-hidden bg-slate-900">
-                  <img
-                    src={demo.image}
-                    alt={demo.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
-                  />
-                  <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/95 text-slate-900 shadow-md">
-                    {demo.tag}
+              <div className="card-beam-content rounded-[22px] overflow-hidden">
+                <div>
+                  <div className="relative h-52 overflow-hidden bg-slate-950">
+                    <img
+                      src={demo.image}
+                      alt={demo.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover crisp-studio-img group-hover:scale-105 transition-transform duration-500 brightness-[0.97] group-hover:brightness-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-black/20 pointer-events-none"></div>
+
+                    <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/95 text-slate-900 shadow-md backdrop-blur-sm">
+                      {demo.tag}
+                    </div>
+                    <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded text-[10px] font-bold bg-slate-950/85 text-white backdrop-blur-sm border border-white/10">
+                      {demo.category}
+                    </div>
                   </div>
-                  <div className="absolute bottom-3 left-3 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-950/80 text-white backdrop-blur-sm">
-                    {demo.category}
+
+                  <div className="p-5">
+                    <h3 className="text-base font-extrabold text-slate-900 mb-2 leading-snug group-hover:text-blue-600 transition-colors">
+                      {demo.title}
+                    </h3>
+
+                    <div className="space-y-1.5 my-3">
+                      {demo.features.map((feature, fIdx) => (
+                        <div key={fIdx} className="flex items-center gap-2 text-xs text-slate-600">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                <div className="p-5">
-                  <h3 className="text-base font-extrabold text-slate-900 mb-2 leading-snug">
-                    {demo.title}
-                  </h3>
-
-                  <div className="space-y-1.5 my-3">
-                    {demo.features.map((feature, fIdx) => (
-                      <div key={fIdx} className="flex items-center gap-2 text-xs text-slate-600">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span>{feature}</span>
-                      </div>
-                    ))}
-                  </div>
+                <div className="p-5 pt-0">
+                  <button
+                    onClick={() => setActiveDemoModal(demo)}
+                    className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-amber-400 text-slate-900 hover:text-slate-950 font-black text-xs transition-colors flex items-center justify-center gap-1.5 group-hover:bg-slate-900 group-hover:text-white"
+                  >
+                    <span>Inspect Architecture Preview</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-              </div>
-
-              <div className="p-5 pt-0">
-                <button
-                  onClick={() => setActiveDemoModal(demo)}
-                  className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-amber-400 text-slate-900 hover:text-slate-950 font-black text-xs transition-colors flex items-center justify-center gap-1.5"
-                >
-                  <span>Inspect Architecture Preview</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
               </div>
             </div>
           ))}
@@ -248,7 +253,7 @@ export const LiveDemosSection: React.FC<LiveDemosSectionProps> = ({
                 <img
                   src={activeDemoModal.image}
                   alt={activeDemoModal.title}
-                  className="w-full h-44 object-cover"
+                  className="w-full h-48 sm:h-64 object-cover crisp-studio-img"
                 />
                 
                 <div className="p-5 space-y-4">

@@ -465,5 +465,63 @@
   .pulse-gold-ring {
     animation: pulse-ring 2.4s infinite;
   }
+
+  /* Ultra-Premium Running Border Light Beam for Cards */
+  .card-border-beam {
+    position: relative;
+    overflow: hidden;
+    background: #ffffff;
+    isolation: isolate;
+  }
+
+  .card-border-beam::before {
+    content: '';
+    position: absolute;
+    inset: -200%;
+    background: conic-gradient(
+      from 0deg at 50% 50%,
+      transparent 0deg,
+      transparent 65deg,
+      #38bdf8 85deg,
+      #f59e0b 105deg,
+      #ec4899 125deg,
+      transparent 145deg,
+      transparent 360deg
+    );
+    animation: rotate-card-beam 4.5s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.85;
+    transition: opacity 0.3s ease;
+  }
+
+  .card-border-beam:hover::before {
+    opacity: 1;
+    animation-duration: 3s;
+  }
+
+  .card-border-beam > .card-beam-content {
+    position: relative;
+    z-index: 1;
+    background: #ffffff;
+    height: 100%;
+    border-radius: inherit;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  @keyframes rotate-card-beam {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* High-fidelity Crisp Image Enhancement */
+  .crisp-studio-img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
 }
 
