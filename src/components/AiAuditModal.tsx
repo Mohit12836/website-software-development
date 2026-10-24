@@ -7,9 +7,9 @@ import {
   CheckCircle2, 
   AlertTriangle, 
   ArrowRight, 
-  MessageCircle,
+  Sparkles,
   ExternalLink,
-  Sparkles
+  Info
 } from 'lucide-react';
 
 interface AiAuditModalProps {
@@ -27,169 +27,184 @@ export const AiAuditModal: React.FC<AiAuditModalProps> = ({
 }) => {
   const [url, setUrl] = useState('');
   const [isAuditing, setIsAuditing] = useState(false);
-  const [auditResult, setAuditResult] = useState<{
-    score: number;
-    speed: string;
-    issues: string[];
-    wins: string[];
-    recommendedPackage: string;
-    budget: string;
-  } | null>(null);
+  const [checklistCompleted, setChecklistCompleted] = useState(false);
+  const [selectedConcerns, setSelectedConcerns] = useState<string[]>([]);
 
   if (!isOpen) return null;
 
-  const handleStartAudit = (e: React.FormEvent) => {
+  const evaluationChecklist = [
+    { id: 'mobile_slow', label: 'Takes more than 3 seconds to load on mobile connections' },
+    { id: 'layout_broken', label: 'Text or buttons overflow screen edges on smartphones' },
+    { id: 'unclear_offer', label: 'Visitors cannot immediately tell what is being offered within 5 seconds' },
+    { id: 'no_easy_contact', label: 'Visitors have to hunt for a contact email or fill long forms' },
+    { id: 'outdated_design', label: 'Looks outdated compared to modern competitors in your industry' }
+  ];
+
+  const handleToggleConcern = (id: string) => {
+    setSelectedConcerns(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleRunEvaluation = (e: React.FormEvent) => {
     e.preventDefault();
     if (!url.trim()) return;
 
     setIsAuditing(true);
-    setAuditResult(null);
+    setChecklistCompleted(false);
 
-    // Simulate diagnostic scan
+    // Structural checklist calculation
     setTimeout(() => {
       setIsAuditing(false);
-      setAuditResult({
-        score: 54,
-        speed: '4.2s (Too Slow for Mobile)',
-        issues: [
-          'Mobile view shows horizontal overflow scroll (Fails Google Mobile UX)',
-          'No direct 1-click WhatsApp reservation/inquiry trigger',
-          'Contact form requires 7 fields (causing 60%+ checkout drop-off)',
-          'Missing local service schema metadata for Google Search ranking'
-        ],
-        wins: [
-          'Brand logo & business hours are visible',
-          'SSL certificate is active & valid'
-        ],
-        recommendedPackage: 'Business Website Package',
-        budget: currency === 'INR' ? '₹35,000' : '$2,200'
-      });
-    }, 2000);
+      setChecklistCompleted(true);
+    }, 600);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl animated-glass-card p-6 sm:p-8 overflow-hidden border border-white/20">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-xl rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/10">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-cyan-950/80 border border-cyan-500/40 text-cyan-400 flex items-center justify-center font-bold">
-              <Sparkles className="w-4 h-4" />
+        {/* Modal Header */}
+        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-700">
+              <Search className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-black text-white">
-                Live AI Website & Conversion Audit
+              <h3 className="text-base font-extrabold text-slate-900">
+                Website UX & Performance Evaluation
               </h3>
-              <p className="text-xs text-slate-400">Objective, evidence-backed diagnostic analysis</p>
+              <p className="text-xs text-slate-500">
+                Diagnostic checklist to discover why your current website may be leaking leads
+              </p>
             </div>
           </div>
+
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Audit Form or Results */}
-        {!auditResult ? (
-          <form onSubmit={handleStartAudit} className="mt-6">
-            <label className="block text-xs font-bold uppercase text-cyan-400 mb-2">
-              Enter Your Current Website URL
-            </label>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="text"
-                required
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="e.g. www.yourrestaurant.com or yourclinic.in"
-                className="flex-1 px-4 py-3 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400"
-              />
+        {/* Modal Body */}
+        <div className="p-6 overflow-y-auto space-y-5 text-slate-700 text-xs sm:text-sm">
+          
+          <div className="p-3.5 rounded-xl bg-blue-50 border border-blue-200 flex items-start gap-2.5 text-xs text-blue-900">
+            <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+            <span>
+              <strong>Engineering Notice:</strong> This tool performs a structural self-evaluation of common conversion bottlenecks. For a live Lighthouse or PageSpeed lab report, contact our team with your URL for a manual audit.
+            </span>
+          </div>
+
+          {!checklistCompleted ? (
+            <form onSubmit={handleRunEvaluation} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Website URL to Evaluate
+                </label>
+                <input
+                  type="text"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="e.g. yourbusiness.com"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:border-amber-500 text-slate-900 text-xs sm:text-sm shadow-inner"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-2">
+                  Select any symptoms your website currently experiences:
+                </label>
+                <div className="space-y-2">
+                  {evaluationChecklist.map((item) => (
+                    <label 
+                      key={item.id} 
+                      className={`flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${
+                        selectedConcerns.includes(item.id) 
+                          ? 'border-amber-400 bg-amber-50/50' 
+                          : 'border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      <input 
+                        type="checkbox"
+                        checked={selectedConcerns.includes(item.id)}
+                        onChange={() => handleToggleConcern(item.id)}
+                        className="mt-0.5 rounded text-amber-500 focus:ring-amber-400"
+                      />
+                      <span className="text-xs text-slate-700 leading-snug">{item.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               <button
                 type="submit"
                 disabled={isAuditing}
-                className="bilberrry-btn-glow px-6 py-3.5 rounded-xl text-white font-extrabold text-xs shadow-glow flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs sm:text-sm shadow-lg hover:brightness-105 active:scale-98 transition-all flex items-center justify-center gap-2"
               >
                 {isAuditing ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Analyzing...</span>
+                    <span>Analyzing Structural Factors...</span>
                   </>
                 ) : (
                   <>
-                    <span>Run AI Audit</span>
+                    <span>Generate Remediation Plan</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </button>
-            </div>
-            <p className="mt-3 text-[11px] text-slate-400 leading-relaxed">
-              We check load speed, mobile responsive fit, broken form friction, and missing lead channels without asking for your password.
-            </p>
-          </form>
-        ) : (
-          <div className="mt-5 space-y-4">
-            
-            {/* Score Banner */}
-            <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-500/40 flex items-center justify-between">
-              <div>
-                <span className="text-xs font-bold text-amber-300">
-                  Diagnostic Health Score: {auditResult.score}/100
-                </span>
-                <p className="text-xs text-slate-300 mt-0.5">
-                  Mobile Speed: <strong className="text-rose-400">{auditResult.speed}</strong>
-                </p>
-              </div>
-              <span className="px-3 py-1 rounded-full bg-rose-600 text-white text-[11px] font-black uppercase tracking-wider">
-                Needs Immediate Fix
-              </span>
-            </div>
-
-            {/* Critical Leaks */}
-            <div>
-              <h4 className="text-xs font-bold uppercase text-cyan-400 mb-2 flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4 text-rose-400" />
-                Detected Friction Leaks:
-              </h4>
-              <ul className="space-y-1.5 text-xs text-slate-200">
-                {auditResult.issues.map((iss, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-rose-400 font-bold">•</span>
-                    <span>{iss}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Proposed Solution Package */}
-            <div className="p-4 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400">
-                  Recommended Plug-and-Play Solution
-                </span>
-                <h5 className="text-sm font-black text-white mt-0.5">
-                  {auditResult.recommendedPackage}
-                </h5>
-                <span className="text-xs text-slate-300">
-                  Fixed Scope Investment: <strong className="text-cyan-400 font-bold">{auditResult.budget}</strong>
-                </span>
+            </form>
+          ) : (
+            <div className="space-y-4 animate-in fade-in">
+              <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-2">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                  <span className="font-bold text-slate-900 text-xs">Evaluated Target:</span>
+                  <span className="font-mono text-xs text-amber-700">{url}</span>
+                </div>
+                <div className="text-xs text-slate-600">
+                  Identified Concerns: <strong>{selectedConcerns.length} of 5 checked</strong>
+                </div>
               </div>
 
-              <button
-                onClick={() => {
-                  onClose();
-                  onChoosePackage(auditResult.recommendedPackage);
-                }}
-                className="bilberrry-btn-glow px-5 py-2.5 rounded-xl text-white font-extrabold text-xs shadow-glow"
-              >
-                Fix This With Us
-              </button>
-            </div>
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Recommended Technical Action:
+                </h4>
+                <div className="p-4 rounded-xl border border-amber-200 bg-amber-50 text-xs space-y-1.5 text-slate-800">
+                  <p className="font-bold text-amber-900">
+                    Full Modern Re-Engineering & Responsive Layout
+                  </p>
+                  <p>
+                    Rebuilding with a fluid auto-fit layout, high-performance static rendering, and clean zero-friction contact funnels solves these symptoms permanently without ongoing framework bloat.
+                  </p>
+                </div>
+              </div>
 
-          </div>
-        )}
+              <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={() => {
+                    onClose();
+                    onChoosePackage('Website Redesign & Speed Optimization');
+                  }}
+                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs shadow-md text-center hover:brightness-105 transition-all"
+                >
+                  Discuss Project Blueprint With Us →
+                </button>
+                <button
+                  onClick={() => setChecklistCompleted(false)}
+                  className="py-3 px-4 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition-colors"
+                >
+                  Evaluate Another Site
+                </button>
+              </div>
+            </div>
+          )}
+
+        </div>
 
       </div>
     </div>

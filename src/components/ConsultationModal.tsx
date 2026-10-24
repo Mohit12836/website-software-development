@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Send, 
-  MessageCircle, 
   CheckCircle2, 
   Sparkles, 
   ShieldCheck,
@@ -16,854 +15,869 @@ import {
   Edit3,
   Bot,
   User,
-  ExternalLink,
   ChevronRight,
   Clock,
   Layers,
   HelpCircle,
-  Check
+  Check,
+  ExternalLink,
+  Minimize2
 } from 'lucide-react';
 import { NICHE_SOLUTIONS } from '../data/agencyData';
-import type { NicheSolution } from '../data/agencyData';
+import { STUDIO_CONFIG } from '../data/studioConfig';
+import type { ProjectBrief } from '../data/projectBriefState';
 
 interface ConsultationModalProps {
   isOpen: boolean;
   onClose: () => void;
   currency: 'INR' | 'USD';
   initialSubject?: string;
-}
-
-interface ChatMessage {
-  id: string;
-  sender: 'ai' | 'user';
-  text: string;
-  options?: string[];
-  demoCard?: {
-    title: string;
-    image: string;
-    demoUrl?: string;
-  };
-  showBlueprintCta?: boolean;
-}
-
-export interface ProjectBlueprintData {
-  businessName: string;
-  industry: string;
-  primaryGoals: string[];
-  painPoints: string[];
-  solutionTitle: string;
-  solutionType: string;
-  essentialFeatures: string[];
-  optionalFeatures: string[];
-  demoImage: string;
-  demoUrl?: string;
-  indicativeBudget: string;
-  estimatedTimeline: string;
-  clientInputsNeeded: string[];
-  status: 'draft' | 'blueprint_ready' | 'client_confirmed' | 'under_owner_review' | 'quote_sent';
-  contactName?: string;
-  contactPhone?: string;
-  contactEmail?: string;
-  contactPreference?: 'whatsapp' | 'phone' | 'email';
+  projectBrief: ProjectBrief;
+  setProjectBrief: React.Dispatch<React.SetStateAction<ProjectBrief>>;
 }
 
 export const ConsultationModal: React.FC<ConsultationModalProps> = ({
   isOpen,
   onClose,
   currency,
-  initialSubject
+  initialSubject,
+  projectBrief,
+  setProjectBrief
 }) => {
-  // Mode: 'consultation' (natural chat) | 'blueprint' (structured project brief) | 'quick_form' (direct quote request)
-  const [activeView, setActiveView] = useState<'consultation' | 'blueprint' | 'quick_form'>('consultation');
-  
-  // Chat Conversation State
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputText, setInputText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [chatTurn, setChatTurn] = useState<number>(0);
-  const chatBottomRef = useRef<HTMLDivElement>(null);
+  // Navigation tabs:
+  // 'guided': step-by-step technical discovery
+  // 'blueprint': structured review of collected project brief
+  const [activeTab, setActiveTab] = useState<'guided' | 'blueprint'>('guided');
 
-  // Structured Project Blueprint Data (Persistent state)
-  const [blueprint, setBlueprint] = useState<ProjectBlueprintData>({
-    businessName: '',
-    industry: initialSubject || 'Restaurant',
-    primaryGoals: ['Online Presence', 'Direct Enquiries'],
-    painPoints: ['Manual orders and scattered information'],
-    solutionTitle: 'Tailored Web & Automation Platform',
-    solutionType: 'Business Website & Lead Funnel',
-    essentialFeatures: ['Mobile-first fluid responsive layout', '1-Tap WhatsApp Lead Capture', 'Google Maps & SEO Schema'],
-    optionalFeatures: ['Custom CRM Integration', 'Automated WhatsApp Bot Reminders'],
-    demoImage: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80',
-    indicativeBudget: currency === 'INR' ? '₹18,000 – ₹45,000 (Scope Guidance)' : '$1,200 – $3,500 (Scope Guidance)',
-    estimatedTimeline: '7 से 12 कार्य दिवस',
-    clientInputsNeeded: ['Brand logo & high-res photos', 'Menu / Service price list', 'Domain preference'],
-    status: 'draft'
-  });
+  // Step state within guided consultation (1 to 5)
+  // Step 1: Core Goal
+  // Step 2: Industry / Nature of Business
+  // Step 3: Current State & Specific Requirements
+  // Step 4: Budget & Timeline Expectations
+  // Step 5: Contact & Verification Submission
+  const [consultationStep, setConsultationStep] = useState<number>(1);
 
-  // Contact capture for quotation finalization
-  const [contactName, setContactName] = useState('');
-  const [contactPhone, setContactPhone] = useState('');
-  const [contactEmail, setContactEmail] = useState('');
-  const [contactPref, setContactPref] = useState<'whatsapp' | 'phone' | 'email'>('whatsapp');
-  const [isSubmittingQuote, setIsSubmittingQuote] = useState(false);
-  const [quoteSubmitted, setQuoteSubmitted] = useState(false);
+  // Submission status
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [submissionSuccess, setSubmissionSuccess] = useState<{
+    referenceId: string;
+    message: string;
+  } | null>(null);
 
-  // Initialize consultation on open
+  // Honeypot field for spam prevention
+  const [honeypot, setHoneypot] = useState('');
+
+  // Handle initial subject passed from outside (e.g. from a demo click or industry click)
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      initConversation(initialSubject);
+    if (initialSubject && isOpen) {
+      // Check if it matches an industry
+      const matchedNiche = NICHE_SOLUTIONS.find(n => 
+        n.name.toLowerCase().includes(initialSubject.toLowerCase()) ||
+        initialSubject.toLowerCase().includes(n.name.toLowerCase())
+      );
+
+      if (matchedNiche) {
+        setProjectBrief(prev => ({
+          ...prev,
+          industryId: matchedNiche.id,
+          industryName: matchedNiche.name,
+          essentialFeatures: prev.essentialFeatures.length > 0 
+            ? prev.essentialFeatures 
+            : matchedNiche.deliverables.slice(0, 3)
+        }));
+      } else {
+        setProjectBrief(prev => ({
+          ...prev,
+          goalTitle: initialSubject
+        }));
+      }
     }
-  }, [isOpen, initialSubject]);
-
-  useEffect(() => {
-    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+  }, [initialSubject, isOpen]);
 
   if (!isOpen) return null;
 
-  // Initialize consultation conversation
-  const initConversation = (subject?: string) => {
-    const defaultIndustry = subject || 'Restaurant';
-    const initialMatched = NICHE_SOLUTIONS.find(n => n.name.toLowerCase().includes(defaultIndustry.toLowerCase())) || NICHE_SOLUTIONS[0];
-
-    updateBlueprintFromIndustry(initialMatched.name, initialMatched);
-
-    const greeting: ChatMessage = {
-      id: 'msg-1',
-      sender: 'ai',
-      text: `नमस्ते! मैं Vismart AI Project Consultant हूँ।\n\nमेरा उद्देश्य आपको कोई महँगा पैकेज बेचना नहीं, बल्कि आपके बिज़नेस की वास्तविक आवश्यकता को समझना और सही समाधान का खाका (Project Blueprint) तैयार करना है।\n\nआपका बिज़नेस किस प्रकार का है?`,
-      options: [
-        'Restaurant / Cafe',
-        'Clinic / Healthcare',
-        'Retail / Kirana Shop',
-        'Service / Contractor',
-        'Coaching / Education',
-        'B2B / Manufacturer',
-        'E-commerce / D2C'
-      ]
-    };
-
-    setMessages([greeting]);
-    setChatTurn(1);
+  // Step 1: Select Goal
+  const handleSelectGoal = (goalKey: string, goalTitle: string) => {
+    setProjectBrief(prev => ({
+      ...prev,
+      goal: goalKey,
+      goalTitle
+    }));
+    setConsultationStep(2);
   };
 
-  const updateBlueprintFromIndustry = (industryName: string, matchedSolution: NicheSolution) => {
-    setBlueprint(prev => ({
+  // Step 2: Select Industry
+  const handleSelectIndustry = (industryId: string, industryName: string) => {
+    const matched = NICHE_SOLUTIONS.find(n => n.id === industryId);
+    setProjectBrief(prev => ({
       ...prev,
-      industry: industryName,
-      solutionTitle: `${industryName} Dedicated Digital Platform`,
-      solutionType: matchedSolution.solution,
-      painPoints: [matchedSolution.painPoint],
-      primaryGoals: [matchedSolution.businessImpact],
-      essentialFeatures: matchedSolution.deliverables.slice(0, 4),
-      optionalFeatures: matchedSolution.deliverables.slice(4),
-      demoImage: matchedSolution.demoImage,
-      indicativeBudget: currency === 'INR' ? matchedSolution.indiaBudget : matchedSolution.usaBudget,
-      estimatedTimeline: '7 से 12 कार्य दिवस'
+      industryId,
+      industryName,
+      customIndustryName: '',
+      essentialFeatures: matched ? matched.deliverables.slice(0, 3) : prev.essentialFeatures
+    }));
+    setConsultationStep(3);
+  };
+
+  const handleCustomIndustry = (name: string) => {
+    setProjectBrief(prev => ({
+      ...prev,
+      industryId: 'custom',
+      industryName: name || 'Custom Business',
+      customIndustryName: name
     }));
   };
 
-  const handleSendMessage = (textToSend?: string) => {
-    const text = textToSend || inputText;
-    if (!text.trim()) return;
-
-    const userMsg: ChatMessage = {
-      id: `user-${Date.now()}`,
-      sender: 'user',
-      text: text.trim()
-    };
-
-    setMessages(prev => [...prev, userMsg]);
-    setInputText('');
-    setIsTyping(true);
-
-    setTimeout(() => {
-      processNextAiTurn(text.trim(), chatTurn);
-      setIsTyping(false);
-    }, 600);
+  // Step 3: Feature Toggles
+  const handleToggleFeature = (feature: string) => {
+    setProjectBrief(prev => {
+      const exists = prev.essentialFeatures.includes(feature);
+      const updated = exists 
+        ? prev.essentialFeatures.filter(f => f !== feature)
+        : [...prev.essentialFeatures, feature];
+      return { ...prev, essentialFeatures: updated };
+    });
   };
 
-  const processNextAiTurn = (userInput: string, currentTurn: number) => {
-    const lower = userInput.toLowerCase();
-
-    // Turn 1: Process Industry Selection
-    if (currentTurn === 1) {
-      const matched = NICHE_SOLUTIONS.find(n => 
-        lower.includes(n.name.toLowerCase()) || 
-        lower.includes(n.hindiName.toLowerCase()) ||
-        n.painPoint.toLowerCase().includes(lower) ||
-        n.solution.toLowerCase().includes(lower)
-      ) || NICHE_SOLUTIONS[0];
-
-      updateBlueprintFromIndustry(matched.name, matched);
-      setChatTurn(2);
-
-      let questionText = '';
-      let options: string[] = [];
-
-      if (lower.includes('restaurant') || lower.includes('cafe')) {
-        questionText = `बहुत बढ़िया! Restaurant के लिए साधारण वेबसाइट के मुकाबले ऑनलाइन मेनू और बुकिंग सिस्टम ज्यादा उपयोगी होता है।\n\nआपका मुख्य उद्देश्य क्या है?`;
-        options = [
-          'Direct Food Orders + WhatsApp',
-          'Table Booking + Google Maps',
-          'Only Digital QR Menu',
-          'All of the above'
-        ];
-      } else if (lower.includes('clinic') || lower.includes('doctor') || lower.includes('health')) {
-        questionText = `क्लीनिक और हेल्थकेयर के लिए मरीजों का भरोसा और समय पर अपॉइंटमेंट सबसे ज़रूरी है।\n\nआपकी मुख्य प्राथमिकता क्या है?`;
-        options = [
-          '24/7 Live Patient Appointment Slots',
-          'Auto WhatsApp Reminders (No-Shows कम करना)',
-          'Doctor Profiles & Transparent Fees',
-          'All of the above'
-        ];
-      } else if (lower.includes('contractor') || lower.includes('service') || lower.includes('hvac')) {
-        questionText = `सर्विस और कॉन्ट्रैक्टर बिज़नेस में ग्राहक एरिया और तुरंत कॉल लीड्स चाहते हैं।\n\nआपकी मुख्य ज़रूरत क्या है?`;
-        options = [
-          'Emergency 1-Tap Call Dispatch',
-          'Zip-Code Territory Validator',
-          'Instant Online Quote Estimator',
-          'All of the above'
-        ];
-      } else if (lower.includes('b2b') || lower.includes('manufactur')) {
-        questionText = `B2B और मैन्युफैक्चरिंग में भारी कैटलॉग भेजने के बजाय डिजिटल RFQ (Request for Quote) सबसे असरदार है।\n\nआप क्या चाहते हैं?`;
-        options = [
-          'Digital B2B Catalog + 1-Click RFQ',
-          'Technical Spec Sheets / TDS Download',
-          'Export / Multi-Currency Inquiry System',
-          'All of the above'
-        ];
-      } else {
-        questionText = `उत्कृष्ट! इस बिज़नेस के लिए डिजिटल पहचान और लीड फनल सबसे ज्यादा महत्वपूर्ण है।\n\nआपकी मुख्य प्राथमिकता क्या है?`;
-        options = [
-          'ऑनलाइन लीड्स और ग्राहक पूछताछ',
-          'ऑनलाइन बिक्री और पेमेंट्स',
-          'कस्टम बिज़नेस मैनेजमेंट व ऑटोमेशन'
-        ];
-      }
-
-      setMessages(prev => [
-        ...prev,
-        {
-          id: `ai-${Date.now()}`,
-          sender: 'ai',
-          text: questionText,
-          options
-        }
-      ]);
-    }
-    // Turn 2: Process Primary Goals & Suggest Live Demo
-    else if (currentTurn === 2) {
-      setBlueprint(prev => ({
-        ...prev,
-        primaryGoals: [userInput, ...prev.primaryGoals]
-      }));
-      setChatTurn(3);
-
-      setMessages(prev => [
-        ...prev,
-        {
-          id: `ai-${Date.now()}`,
-          sender: 'ai',
-          text: `समझ गया! इस उद्देश्य के लिए हमने पहले भी सफल समाधान तैयार किए हैं।\n\nक्या आप इससे मिलता-जुलता वास्तविक वर्किंग डेमो देखना चाहेंगे?`,
-          demoCard: {
-            title: `${blueprint.industry} Interactive Working Demo`,
-            image: blueprint.demoImage,
-            demoUrl: '#demos'
-          },
-          options: [
-            'हाँ, डेमो प्रोटोटाइप देखना है',
-            'सीधे प्रोजेक्ट का Blueprint तैयार करें',
-            'मुझे कुछ विशेष फीचर्स भी जोड़ने हैं'
-          ]
-        }
-      ]);
-    }
-    // Turn 3: Current Digital Presence & Timeline Scoping
-    else if (currentTurn === 3) {
-      setChatTurn(4);
-
-      setMessages(prev => [
-        ...prev,
-        {
-          id: `ai-${Date.now()}`,
-          sender: 'ai',
-          text: `क्या आपके पास पहले से कोई डोमेन या पुरानी वेबसाइट है, या आप बिल्कुल नया (Scratch से) शुरू कर रहे हैं? और आपकी लक्षित समय-सीमा क्या है?`,
-          options: [
-            'बिल्कुल नया शुरू करना है (Fresh Project)',
-            'पुरानी वेबसाइट को नया रूप देना है (Redesign)',
-            'जल्द से जल्द (1-2 हफ्तों में लॉन्च)',
-            'आराम से 3-4 हफ्तों में'
-          ]
-        }
-      ]);
-    }
-    // Turn 4: Finalize Requirements & Produce "Your Project Blueprint"
-    else {
-      setBlueprint(prev => ({
-        ...prev,
-        status: 'blueprint_ready'
-      }));
-
-      setMessages(prev => [
-        ...prev,
-        {
-          id: `ai-${Date.now()}`,
-          sender: 'ai',
-          text: `शानदार! मैंने आपकी सभी बातों को ध्यानपूर्वक समझ लिया है।\n\nआपके प्रोजेक्ट के लिए एक संपूर्ण **"Your Project Blueprint"** तैयार कर दिया गया है।\n\nआप नीचे दिए गए बटन पर क्लिक करके अपना ब्लूप्रिंट देख सकते हैं, आवश्यकतानुसार सुधार कर सकते हैं, और फिर हमारे स्टूडियो ओनर से **मानव-सत्यापित अंतिम कोटेशन (Human-Approved Final Quotation)** माँग सकते हैं।`,
-          showBlueprintCta: true
-        }
-      ]);
-    }
+  // Step 4: Budget & Timeline selection
+  const handleSelectBudget = (budget: string) => {
+    setProjectBrief(prev => ({ ...prev, indicativeBudget: budget }));
   };
 
-  // Submit human-approved final quote request
-  const handleFinalQuoteRequest = async (e: React.FormEvent) => {
+  const handleSelectTimeline = (timeline: string) => {
+    setProjectBrief(prev => ({ ...prev, estimatedTimeline: timeline }));
+  };
+
+  // Step 5: Final Submission to Serverless Lead Intake API
+  const handleSubmitBrief = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!contactName.trim()) {
-      setSubmissionError('कृपया अपना पूरा नाम लिखें।');
-      return;
-    }
-
-    if (!contactPhone.trim() && !contactEmail.trim()) {
-      setSubmissionError('कृपया WhatsApp नंबर या ईमेल आईडी प्रदान करें।');
-      return;
-    }
-
-    setIsSubmittingQuote(true);
     setSubmissionError(null);
 
-    const updatedBlueprint: ProjectBlueprintData = {
-      ...blueprint,
-      contactName: contactName.trim(),
-      contactPhone: contactPhone.trim(),
-      contactEmail: contactEmail.trim(),
-      contactPreference: contactPref,
-      status: 'under_owner_review'
-    };
-
-    setBlueprint(updatedBlueprint);
-
-    // Save locally for persistence
-    try {
-      const existingBriefs = JSON.parse(localStorage.getItem('vismart_project_briefs') || '[]');
-      existingBriefs.push({
-        ...updatedBlueprint,
-        submittedAt: new Date().toISOString()
-      });
-      localStorage.setItem('vismart_project_briefs', JSON.stringify(existingBriefs));
-    } catch (e) {
-      console.warn('LocalStorage save error:', e);
+    // Validation
+    if (!projectBrief.clientName.trim() || projectBrief.clientName.trim().length < 2) {
+      setSubmissionError('Please enter your full name (at least 2 characters).');
+      return;
     }
 
-    // Try sending to lead endpoint
+    if (!projectBrief.clientContact.trim() || projectBrief.clientContact.trim().length < 6) {
+      setSubmissionError('Please enter a valid phone number or email address so we can reply.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      await fetch('http://localhost:3000/api/leads', {
+      const response = await fetch('/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: contactName.trim(),
-          phone: contactPhone.trim(),
-          email: contactEmail.trim(),
-          category: blueprint.industry,
-          service: blueprint.solutionTitle,
-          requirements: JSON.stringify({
-            primaryGoals: blueprint.primaryGoals,
-            painPoints: blueprint.painPoints,
-            essentialFeatures: blueprint.essentialFeatures,
-            indicativeBudget: blueprint.indicativeBudget
-          }),
-          source: 'Vismart AI Consultant - Project Blueprint'
+          name: projectBrief.clientName.trim(),
+          contact: projectBrief.clientContact.trim(),
+          email: projectBrief.clientEmail || (projectBrief.clientContact.includes('@') ? projectBrief.clientContact.trim() : null),
+          phone: projectBrief.clientPhone || (!projectBrief.clientContact.includes('@') ? projectBrief.clientContact.trim() : null),
+          businessType: projectBrief.industryName || projectBrief.customIndustryName || 'Custom Business',
+          goals: [projectBrief.goalTitle || 'Digital Platform Development'],
+          scope: projectBrief.hasExistingSite === 'yes' ? 'Website Redesign & Modernization' : 'Brand New Platform Build',
+          essentialFeatures: projectBrief.essentialFeatures,
+          optionalFeatures: projectBrief.optionalFeatures,
+          budget: projectBrief.indicativeBudget || 'To be scoped with team',
+          timeline: projectBrief.estimatedTimeline,
+          notes: projectBrief.additionalNotes || '',
+          source: 'Vismart Studio Web Portal — Structured Consultation Modal',
+          honeypot
         })
       });
-    } catch (err) {
-      console.log('CRM endpoint offline, local draft preserved.');
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Server rejected lead submission.');
+      }
+
+      // Mark confirmed by backend
+      setProjectBrief(prev => ({
+        ...prev,
+        isComplete: true,
+        serverConfirmed: true,
+        referenceId: data.referenceId,
+        submittedAt: new Date().toISOString()
+      }));
+
+      setSubmissionSuccess({
+        referenceId: data.referenceId,
+        message: data.message
+      });
+
+      // Switch to blueprint view to inspect confirmed dossier
+      setActiveTab('blueprint');
+
+    } catch (err: any) {
+      console.error('Lead submission failure:', err);
+      setSubmissionError(
+        err.message || 'Unable to connect to the studio lead intake server. Please check your internet connection or email us directly at ' + STUDIO_CONFIG.contacts.email
+      );
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmittingQuote(false);
-    setQuoteSubmitted(true);
   };
 
-  const getWhatsAppBlueprintLink = () => {
-    const text = `Hello Vismart Studio,
-I have finalized my Project Blueprint via Vismart AI Consultant:
-
-• Business / Client: ${contactName || 'Prospective Client'}
-• Industry: ${blueprint.industry}
-• Solution Architecture: ${blueprint.solutionTitle}
-• Primary Goals: ${blueprint.primaryGoals.join(', ')}
-• Indicative Budget Guidance: ${blueprint.indicativeBudget}
-• Contact: ${contactPhone || contactEmail || 'Via WhatsApp'}
-
-Please review this brief and issue the Human-Approved Final Quotation & Scope Agreement.`;
-
-    return `https://wa.me/919999999999?text=${encodeURIComponent(text)}`;
-  };
+  const industriesList = [
+    { id: 'restaurant', name: 'Restaurant / Cafe / Food' },
+    { id: 'clinic', name: 'Clinic / Healthcare / Doctor' },
+    { id: 'retail', name: 'Retail Store / Supermarket' },
+    { id: 'services', name: 'Services / HVAC / Contractor' },
+    { id: 'coaching', name: 'Coaching / Education Institute' },
+    { id: 'realestate', name: 'Real Estate / Developer' },
+    { id: 'ecommerce', name: 'E-commerce Brand / D2C' },
+    { id: 'b2b', name: 'B2B Wholesale / Manufacturing' }
+  ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl animated-glass-card rounded-3xl overflow-hidden border border-white/20 shadow-2xl flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-2xl bg-white rounded-3xl border border-slate-200 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
         
-        {/* Top Header with Navigation Tabs */}
-        <div className="p-4 sm:p-5 border-b border-white/10 bg-[#060913]/90 flex items-center justify-between gap-3 shrink-0">
+        {/* Modal Header */}
+        <div className="px-5 py-4 sm:px-6 sm:py-5 border-b border-slate-100 flex items-center justify-between gap-3 shrink-0 bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-500 flex items-center justify-center text-white font-black text-xl shadow-glow shrink-0">
-              <Bot className="w-5 h-5 text-slate-950" />
+            <div className="w-10 h-10 rounded-2xl bg-slate-900 text-amber-400 flex items-center justify-center shadow-md shrink-0">
+              <Building2 className="w-5 h-5 text-amber-400" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm sm:text-base font-black text-white">
-                  Vismart AI Project Consultant
+                <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                  Project Consultation & Brief
                 </h3>
-                <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-amber-400 text-slate-950">
-                  Trust-First Engine
+                <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-slate-100 text-slate-700 border border-slate-300">
+                  {activeTab === 'guided' ? `Step ${consultationStep} of 5` : 'Project Dossier'}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 font-medium">
-                Consult First • Understand Fully • Blueprint • Human-Approved Quotation
+              <p className="text-xs text-slate-500 font-medium">
+                Structured technical discovery for official human-approved quotation
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* View Switcher Tabs */}
-            <div className="flex items-center p-1 rounded-xl bg-slate-900 border border-white/10 text-xs font-bold">
+            {/* Tab Switcher */}
+            <div className="flex items-center p-1 rounded-xl bg-slate-100 text-xs font-bold">
               <button
-                onClick={() => setActiveView('consultation')}
+                onClick={() => setActiveTab('guided')}
                 className={`px-3 py-1 rounded-lg transition-colors ${
-                  activeView === 'consultation' ? 'bg-amber-400 text-slate-950' : 'text-slate-400 hover:text-white'
+                  activeTab === 'guided' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
-                Chat
+                Guided Form
               </button>
               <button
-                onClick={() => setActiveView('blueprint')}
+                onClick={() => setActiveTab('blueprint')}
                 className={`px-3 py-1 rounded-lg flex items-center gap-1 transition-colors ${
-                  activeView === 'blueprint' ? 'bg-amber-400 text-slate-950' : 'text-slate-400 hover:text-white'
+                  activeTab === 'blueprint' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
-                <span>Blueprint</span>
-                {blueprint.status === 'blueprint_ready' && (
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span>Project Brief</span>
+                {projectBrief.serverConfirmed && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 )}
               </button>
             </div>
 
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              title="Close modal"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* =========================================================================
-            VIEW 1: NATURAL AI CONSULTATION CHAT
-            ========================================================================= */}
-        {activeView === 'consultation' && (
-          <div className="flex-1 flex flex-col justify-between overflow-hidden bg-slate-950/70">
-            
-            {/* Scrollable Messages Area */}
-            <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">
-              
-              {/* Trust Disclaimer */}
-              <div className="p-3 rounded-xl bg-blue-950/40 border border-blue-500/30 text-blue-200 text-xs flex items-start gap-2.5">
-                <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                <span className="leading-relaxed">
-                  <strong>Zero-Pressure Guarantee:</strong> यह AI प्रोजेक्ट कंसल्टेंट है। हम शुरुआत में कोई अंतिम बिल या पैकेज नहीं थोपते। आपकी आवश्यकताओं की पुष्टि के बाद ही स्टूडियो ओनर द्वारा फाइनल कोटेशन तैयार किया जाएगा।
-                </span>
-              </div>
-
-              {/* Message Feed */}
-              {messages.map((msg) => (
-                <div 
-                  key={msg.id} 
-                  className={`flex gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  {msg.sender === 'ai' && (
-                    <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-amber-500 to-rose-500 flex items-center justify-center text-slate-950 shrink-0 text-xs font-black shadow-md mt-1">
-                      V
-                    </div>
-                  )}
-
-                  <div className={`max-w-[85%] sm:max-w-[78%] rounded-2xl p-4 text-xs sm:text-sm leading-relaxed ${
-                    msg.sender === 'user' 
-                      ? 'bg-amber-400 text-slate-950 font-bold rounded-tr-none shadow-md' 
-                      : 'bg-slate-900 border border-white/15 text-slate-100 rounded-tl-none shadow-xl'
-                  }`}>
-                    <p className="whitespace-pre-line">{msg.text}</p>
-
-                    {/* Inline Demo Preview Card if suggested */}
-                    {msg.demoCard && (
-                      <div className="mt-3 rounded-xl overflow-hidden border border-white/15 bg-slate-950 group">
-                        <img 
-                          src={msg.demoCard.image} 
-                          alt={msg.demoCard.title}
-                          className="w-full h-32 object-cover group-hover:scale-105 transition-transform" 
-                        />
-                        <div className="p-3 flex items-center justify-between">
-                          <span className="font-bold text-xs text-white">{msg.demoCard.title}</span>
-                          <span className="text-[10px] text-cyan-400 font-black uppercase">Live Working Demo</span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Quick Choice Pills */}
-                    {msg.options && msg.options.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-1.5 pt-2 border-t border-white/10">
-                        {msg.options.map((opt, oIdx) => (
-                          <button
-                            key={oIdx}
-                            onClick={() => handleSendMessage(opt)}
-                            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-amber-400 hover:text-slate-950 border border-white/15 text-slate-200 text-xs font-bold transition-all active:scale-95 text-left"
-                          >
-                            {opt}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Direct CTA to open Blueprint */}
-                    {msg.showBlueprintCta && (
-                      <div className="mt-4 pt-3 border-t border-white/15">
-                        <button
-                          onClick={() => setActiveView('blueprint')}
-                          className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30 hover:scale-102 transition-transform"
-                        >
-                          <FileText className="w-4 h-4" />
-                          <span>View Your Project Blueprint Now →</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-
-              {/* Typing Indicator */}
-              {isTyping && (
-                <div className="flex gap-2 items-center text-slate-400 text-xs">
-                  <div className="w-6 h-6 rounded-lg bg-slate-900 border border-white/10 flex items-center justify-center">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
-                  </div>
-                  <span>Vismart AI Consultant is formulating insights...</span>
-                </div>
-              )}
-
-              <div ref={chatBottomRef} />
-            </div>
-
-            {/* Input Bar */}
-            <div className="p-3 sm:p-4 bg-slate-900/95 border-t border-white/10 shrink-0">
-              <form 
-                onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}
-                className="flex items-center gap-2"
-              >
-                <input
-                  type="text"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  placeholder="अपनी बात लिखें या ऊपर विकल्प चुनें..."
-                  className="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-white/15 text-white placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:border-amber-400 shadow-inner"
-                />
-                <button
-                  type="submit"
-                  disabled={!inputText.trim()}
-                  className="p-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold hover:brightness-110 active:scale-95 disabled:opacity-40 transition-all shadow-md shrink-0"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </form>
-            </div>
-
+        {/* Progress Bar (Only in Guided Mode) */}
+        {activeTab === 'guided' && !submissionSuccess && (
+          <div className="w-full bg-slate-100 h-1">
+            <div 
+              className="bg-gradient-to-r from-amber-500 to-orange-500 h-1 transition-all duration-300"
+              style={{ width: `${(consultationStep / 5) * 100}%` }}
+            ></div>
           </div>
         )}
 
-        {/* =========================================================================
-            VIEW 2: THE VALUABLE "YOUR PROJECT BLUEPRINT" CARD
-            ========================================================================= */}
-        {activeView === 'blueprint' && (
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-950/80 text-white space-y-5">
-            
-            {!quoteSubmitted ? (
-              <>
-                {/* Blueprint Header */}
-                <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900/90 to-amber-950/30 border border-amber-500/30 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block mb-1">
-                      Preliminary Solution Specification
-                    </span>
-                    <h2 className="text-xl sm:text-2xl font-black text-white">
-                      Your Project Blueprint
-                    </h2>
-                    <p className="text-xs text-slate-300 mt-1">
-                      Prepared from your project discussion with Vismart AI Consultant
+        {/* Modal Scrollable Canvas */}
+        <div className="flex-1 p-5 sm:p-6 overflow-y-auto space-y-5 bg-white text-slate-800 text-xs sm:text-sm">
+          
+          {/* ===================================================================
+              TAB 1: GUIDED TECHNICAL INTAKE
+              =================================================================== */}
+          {activeTab === 'guided' && (
+            <div className="space-y-5">
+              
+              {/* STEP 1: Core Goal */}
+              {consultationStep === 1 && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="space-y-1">
+                    <h4 className="text-sm sm:text-base font-extrabold text-slate-900">
+                      Step 1: What is the primary purpose of your project?
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      Select the closest goal so we ask relevant architectural questions:
                     </p>
                   </div>
 
-                  <div className="p-2.5 rounded-xl bg-slate-950 border border-white/10 text-right shrink-0">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase block">Status</span>
-                    <span className="text-xs font-black text-amber-400 flex items-center gap-1 justify-end">
-                      <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                      <span>Blueprint Ready</span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* 2-Column Blueprint Breakdown */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                  
-                  {/* Left: What We Understood */}
-                  <div className="p-4 rounded-xl bg-slate-900/90 border border-white/10 space-y-3">
-                    <div className="flex items-center gap-1.5 text-amber-400 font-bold text-xs uppercase tracking-wider">
-                      <Building2 className="w-4 h-4" />
-                      <span>1. What We Understood (आपकी पहचान व लक्ष्य)</span>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-400 text-[10px] block">Business / Industry:</span>
-                      <strong className="text-white text-sm">{blueprint.industry}</strong>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-400 text-[10px] block">Primary Business Goals:</span>
-                      <ul className="space-y-1 mt-1 text-slate-200">
-                        {blueprint.primaryGoals.map((g, idx) => (
-                          <li key={idx} className="flex items-start gap-1.5">
-                            <span className="text-emerald-400 font-bold">✓</span>
-                            <span>{g}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-400 text-[10px] block">Identified Pain Points:</span>
-                      <p className="text-slate-300 mt-0.5">{blueprint.painPoints[0] || 'Manual operations and scattered lead collection'}</p>
-                    </div>
-                  </div>
-
-                  {/* Right: Suggested Solution Architecture */}
-                  <div className="p-4 rounded-xl bg-slate-900/90 border border-white/10 space-y-3">
-                    <div className="flex items-center gap-1.5 text-cyan-400 font-bold text-xs uppercase tracking-wider">
-                      <Layers className="w-4 h-4" />
-                      <span>2. Suggested Solution Architecture</span>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-400 text-[10px] block">Architecture Name:</span>
-                      <strong className="text-cyan-300 text-sm">{blueprint.solutionTitle}</strong>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-400 text-[10px] block">Estimated Delivery Timeline:</span>
-                      <span className="text-white font-bold">{blueprint.estimatedTimeline}</span>
-                    </div>
-
-                    {/* Budget Guidance Box (Clearly Labeled Subject to Final Scope) */}
-                    <div className="p-3 rounded-lg bg-slate-950 border border-white/10">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                        Indicative Investment Band (Guidance Only):
-                      </span>
-                      <div className="text-lg font-black text-amber-400 mt-0.5">
-                        {blueprint.indicativeBudget}
-                      </div>
-                      <span className="text-[10px] text-slate-400 block mt-0.5">
-                        * वास्तविक फाइनल कोटेशन स्कोप व मानव-सत्यापन के बाद तय होगा।
-                      </span>
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Features & Deliverables Checklist */}
-                <div className="p-4 rounded-xl bg-slate-900/90 border border-white/10">
-                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-3">
-                    3. Key Features Included in this Blueprint:
-                  </span>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                    {blueprint.essentialFeatures.map((feat, idx) => (
-                      <div key={idx} className="flex items-start gap-2 p-2 rounded-lg bg-slate-950/60 border border-white/5">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                        <span className="text-slate-200">{feat}</span>
-                      </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {[
+                      {
+                        key: 'new_website',
+                        title: 'Build a Brand New Website',
+                        desc: 'Fresh corporate site, business presence, menu or product catalogue'
+                      },
+                      {
+                        key: 'redesign',
+                        title: 'Modernize Existing Website',
+                        desc: 'Fix slow loading speeds, broken mobile layouts, and poor lead conversion'
+                      },
+                      {
+                        key: 'custom_app',
+                        title: 'Custom Web Application or Portal',
+                        desc: 'Client portal, booking engine, operational dashboard or internal software'
+                      },
+                      {
+                        key: 'automation',
+                        title: 'Workflow Automation & Integrations',
+                        desc: 'Automated email alerts, CRM sync, database pipelines and API integrations'
+                      }
+                    ].map((item) => (
+                      <button
+                        key={item.key}
+                        onClick={() => handleSelectGoal(item.key, item.title)}
+                        className={`p-4 rounded-2xl border-2 text-left transition-all flex flex-col justify-between ${
+                          projectBrief.goal === item.key 
+                            ? 'border-amber-500 bg-amber-50/50 shadow-sm' 
+                            : 'border-slate-200 hover:border-slate-300 bg-white'
+                        }`}
+                      >
+                        <div>
+                          <h5 className="font-bold text-slate-900 mb-1">{item.title}</h5>
+                          <p className="text-[11px] text-slate-500 leading-snug">{item.desc}</p>
+                        </div>
+                        <div className="mt-3 text-right">
+                          <span className="text-[11px] font-bold text-amber-700">Select →</span>
+                        </div>
+                      </button>
                     ))}
                   </div>
                 </div>
+              )}
 
-                {/* Relevant Live Prototype Match */}
-                <div className="p-4 rounded-xl bg-slate-900/90 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <img 
-                      src={blueprint.demoImage} 
-                      alt="Demo Match" 
-                      className="w-16 h-12 rounded-lg object-cover border border-white/10 shrink-0" 
-                    />
+              {/* STEP 2: Industry / Business Type */}
+              {consultationStep === 2 && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                     <div>
-                      <span className="text-[10px] font-bold text-cyan-400 uppercase block">Matched Working Prototype</span>
-                      <h4 className="text-xs font-bold text-white">{blueprint.industry} Live Interactive Demo</h4>
+                      <h4 className="text-sm sm:text-base font-extrabold text-slate-900">
+                        Step 2: Which industry best describes your business?
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        This customizes feature recommendations to your customer expectations:
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setConsultationStep(1)}
+                      className="text-xs text-slate-400 hover:text-slate-700 underline font-medium"
+                    >
+                      ← Back
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+                    {industriesList.map((ind) => (
+                      <button
+                        key={ind.id}
+                        onClick={() => handleSelectIndustry(ind.id, ind.name)}
+                        className={`p-3 rounded-2xl border-2 text-center text-xs font-bold transition-all ${
+                          projectBrief.industryId === ind.id 
+                            ? 'border-amber-500 bg-amber-50 text-amber-900 shadow-sm' 
+                            : 'border-slate-200 hover:border-slate-300 text-slate-700 bg-white'
+                        }`}
+                      >
+                        {ind.name}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Or Custom Industry Input */}
+                  <div className="pt-2">
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Or type your custom business sector:
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={projectBrief.customIndustryName || ''}
+                        onChange={(e) => handleCustomIndustry(e.target.value)}
+                        placeholder="e.g. Solar Energy, Legal Advisory, Fitness Gym..."
+                        className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm focus:outline-none focus:border-amber-500 shadow-inner"
+                      />
+                      <button
+                        onClick={() => {
+                          if (projectBrief.customIndustryName) {
+                            setConsultationStep(3);
+                          }
+                        }}
+                        disabled={!projectBrief.customIndustryName}
+                        className="px-4 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs disabled:opacity-40"
+                      >
+                        Continue
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 3: Specific Features & Scope */}
+              {consultationStep === 3 && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <div>
+                      <h4 className="text-sm sm:text-base font-extrabold text-slate-900">
+                        Step 3: Select Essential Capabilities
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        Industry: <strong>{projectBrief.industryName || 'Custom'}</strong> • Check all features needed:
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setConsultationStep(2)}
+                      className="text-xs text-slate-400 hover:text-slate-700 underline font-medium"
+                    >
+                      ← Back
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    {[
+                      '100% Fluid Auto-Fit Mobile & Tablet Ergonomics',
+                      'Direct Lead / Inquiry Capture Funnel',
+                      'Online Reservation or Appointment Scheduling',
+                      'Product or Service Price Catalogue Display',
+                      'Payment Gateway Integration (Razorpay / Stripe)',
+                      'Customer Testimonials & Case Study Proofs',
+                      'Interactive Cost / Estimate Calculator',
+                      'Search Engine Schema & Google Maps Local SEO',
+                      'Automated Email Confirmation Notifications'
+                    ].map((feature, fIdx) => {
+                      const isChecked = projectBrief.essentialFeatures.includes(feature);
+                      return (
+                        <div
+                          key={fIdx}
+                          onClick={() => handleToggleFeature(feature)}
+                          className={`p-3 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between ${
+                            isChecked 
+                              ? 'border-amber-500 bg-amber-50/60 text-slate-900 font-bold' 
+                              : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                          }`}
+                        >
+                          <span className="text-xs leading-snug">{feature}</span>
+                          <div className={`w-4 h-4 rounded flex items-center justify-center border shrink-0 ml-2 ${
+                            isChecked ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-300'
+                          }`}>
+                            {isChecked && <Check className="w-3 h-3" />}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="pt-3 flex justify-between items-center">
+                    <span className="text-xs text-slate-500">
+                      Selected: <strong>{projectBrief.essentialFeatures.length} features</strong>
+                    </span>
+                    <button
+                      onClick={() => setConsultationStep(4)}
+                      className="py-2.5 px-5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs hover:brightness-105 transition-all shadow-md"
+                    >
+                      Continue to Budget & Timeline →
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 4: Budget & Timeline */}
+              {consultationStep === 4 && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <div>
+                      <h4 className="text-sm sm:text-base font-extrabold text-slate-900">
+                        Step 4: Investment Expectations & Timeline
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        Provides clarity so our technical architect configures appropriate infrastructure:
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setConsultationStep(3)}
+                      className="text-xs text-slate-400 hover:text-slate-700 underline font-medium"
+                    >
+                      ← Back
+                    </button>
+                  </div>
+
+                  {/* Budget Options */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-2">
+                      Target Investment Range ({currency}):
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      {(currency === 'INR' ? [
+                        '₹15,000 – ₹35,000 (Standard Website)',
+                        '₹35,000 – ₹85,000 (Growth Lead Engine)',
+                        '₹85,000+ (Custom Portal / Web App)'
+                      ] : [
+                        '$800 – $1,800 (Standard Website)',
+                        '$1,800 – $4,500 (Growth Lead Engine)',
+                        '$4,500+ (Custom Portal / Web App)'
+                      ]).map((bTier, bIdx) => (
+                        <button
+                          key={bIdx}
+                          type="button"
+                          onClick={() => handleSelectBudget(bTier)}
+                          className={`p-3 rounded-xl border-2 text-left text-xs transition-all ${
+                            projectBrief.indicativeBudget === bTier 
+                              ? 'border-amber-500 bg-amber-50 font-bold text-slate-900' 
+                              : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                          }`}
+                        >
+                          {bTier}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
-                  <a
-                    href="#demos"
-                    onClick={onClose}
-                    className="px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center gap-1.5 border border-white/10 shrink-0"
-                  >
-                    <span>Test Working Demo</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
+                  {/* Timeline Options */}
+                  <div className="pt-2">
+                    <label className="block text-xs font-bold text-slate-800 mb-2">
+                      Required Delivery Timeline:
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      {[
+                        'Standard Delivery (2–3 Weeks)',
+                        'Accelerated Priority (7–10 Days)',
+                        'Flexible / Scoping Phase'
+                      ].map((tOpt, tIdx) => (
+                        <button
+                          key={tIdx}
+                          type="button"
+                          onClick={() => handleSelectTimeline(tOpt)}
+                          className={`p-3 rounded-xl border-2 text-left text-xs transition-all ${
+                            projectBrief.estimatedTimeline === tOpt 
+                              ? 'border-amber-500 bg-amber-50 font-bold text-slate-900' 
+                              : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                          }`}
+                        >
+                          {tOpt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-                {/* Final Step: Human-Approved Quotation Request Form */}
-                <div className="p-5 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-amber-500/40 shadow-xl">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="w-6 h-6 rounded-full bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center">
-                      4
-                    </span>
+                  <div className="pt-3 text-right">
+                    <button
+                      onClick={() => setConsultationStep(5)}
+                      className="py-2.5 px-5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs hover:brightness-105 transition-all shadow-md"
+                    >
+                      Proceed to Final Verification & Submission →
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 5: Contact Verification & Server Lead Dispatch */}
+              {consultationStep === 5 && !submissionSuccess && (
+                <form onSubmit={handleSubmitBrief} className="space-y-4 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                     <div>
-                      <h3 className="text-sm font-black text-white">
-                        Next Step — Request Human-Approved Final Quotation
-                      </h3>
-                      <p className="text-[11px] text-slate-400">
-                        Vismart Studio के फाउंडर आपकी आवश्यकताओं का रिव्यू करेंगे और लिखित कोटेशन तैयार करेंगे।
+                      <h4 className="text-sm sm:text-base font-extrabold text-slate-900">
+                        Step 5: Contact Verification
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        Submit your brief directly to Vismart Studio servers for human quotation review:
                       </p>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setConsultationStep(4)}
+                      className="text-xs text-slate-400 hover:text-slate-700 underline font-medium"
+                    >
+                      ← Back
+                    </button>
+                  </div>
+
+                  {/* Honeypot hidden input */}
+                  <div className="hidden" aria-hidden="true">
+                    <input 
+                      type="text" 
+                      value={honeypot} 
+                      onChange={(e) => setHoneypot(e.target.value)} 
+                      tabIndex={-1} 
+                      autoComplete="off" 
+                    />
                   </div>
 
                   {submissionError && (
-                    <div className="mb-3 p-2.5 rounded-lg bg-rose-950/70 border border-rose-500/50 text-rose-200 text-xs">
-                      {submissionError}
+                    <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-xs flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                      <span>{submissionError}</span>
                     </div>
                   )}
 
-                  <form onSubmit={handleFinalQuoteRequest} className="space-y-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                      <div>
-                        <label className="block text-slate-300 font-bold mb-1">Your Name *</label>
-                        <input
-                          type="text"
-                          required
-                          value={contactName}
-                          onChange={(e) => setContactName(e.target.value)}
-                          placeholder="e.g. Mohit Sharma"
-                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-slate-300 font-bold mb-1">WhatsApp / Phone Number *</label>
-                        <input
-                          type="tel"
-                          required
-                          value={contactPhone}
-                          onChange={(e) => setContactPhone(e.target.value)}
-                          placeholder="e.g. +91 98765 43210"
-                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
-                        />
-                      </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-1">
+                        Your Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={projectBrief.clientName}
+                        onChange={(e) => setProjectBrief(prev => ({ ...prev, clientName: e.target.value }))}
+                        placeholder="e.g. John Doe / Rajesh Sharma"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm focus:outline-none focus:border-amber-500 shadow-inner"
+                        required
+                      />
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                      <div>
-                        <label className="block text-slate-300 font-bold mb-1">Email (Optional for PDF Quote)</label>
-                        <input
-                          type="email"
-                          value={contactEmail}
-                          onChange={(e) => setContactEmail(e.target.value)}
-                          placeholder="name@business.com"
-                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-slate-300 font-bold mb-1">Preferred Contact Mode</label>
-                        <select
-                          value={contactPref}
-                          onChange={(e) => setContactPref(e.target.value as any)}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/15 text-white text-xs focus:outline-none focus:border-amber-400"
-                        >
-                          <option value="whatsapp">WhatsApp (Fastest Response)</option>
-                          <option value="phone">Direct Phone Call</option>
-                          <option value="email">Email Proposal</option>
-                        </select>
-                      </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-1">
+                        Contact Phone or Email *
+                      </label>
+                      <input
+                        type="text"
+                        value={projectBrief.clientContact}
+                        onChange={(e) => setProjectBrief(prev => ({ ...prev, clientContact: e.target.value }))}
+                        placeholder="Phone or official email"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm focus:outline-none focus:border-amber-500 shadow-inner"
+                        required
+                      />
                     </div>
+                  </div>
 
-                    {/* Dual Action Buttons */}
-                    <div className="pt-2 flex flex-col sm:flex-row items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setActiveView('consultation')}
-                        className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>Edit Requirements</span>
-                      </button>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Additional Requirements or Existing Website URL (Optional)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={projectBrief.additionalNotes || ''}
+                      onChange={(e) => setProjectBrief(prev => ({ ...prev, additionalNotes: e.target.value }))}
+                      placeholder="Share existing website link, design preferences, or specific software you currently run..."
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm focus:outline-none focus:border-amber-500 shadow-inner"
+                    />
+                  </div>
 
-                      <button
-                        type="submit"
-                        disabled={isSubmittingQuote}
-                        className="flex-1 w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30 hover:scale-102 transition-transform disabled:opacity-50"
-                      >
-                        {isSubmittingQuote ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span>Submitting to Studio Owner...</span>
-                          </>
-                        ) : (
-                          <>
-                            <ShieldCheck className="w-4 h-4" />
-                            <span>Submit for Human-Approved Final Quote →</span>
-                          </>
-                        )}
-                      </button>
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1">
+                    <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                      <span>Human-Approved Quotation Guarantee:</span>
                     </div>
-
-                  </form>
-                </div>
-              </>
-            ) : (
-              /* Success Confirmation */
-              <div className="py-8 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500 text-emerald-400 flex items-center justify-center mx-auto text-2xl font-black">
-                  ✓
-                </div>
-
-                <h3 className="text-xl font-black text-white">
-                  Project Blueprint Received by Vismart Studio!
-                </h3>
-
-                <p className="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
-                  धन्यवाद <strong>{contactName}</strong>! आपकी आवश्यकताओं का पूरा विवरण Vismart Studio की तकनीकी समीक्षा टीम के पास पहुँच चुका है। कोई ऑटोमैटिक अनुमान नहीं—वास्तविक स्कोप देखकर हमारे फाउंडर आपसे संपर्क करेंगे।
-                </p>
-
-                <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
-                  <a
-                    href={getWhatsAppBlueprintLink()}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/30 transition-all hover:scale-105"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>Fast-Track on WhatsApp with Blueprint</span>
-                  </a>
+                    <p>
+                      Submitting this brief does not bind you to any purchase. Our studio founders review the architecture, confirm technical feasibility, and send a verified formal quotation within 24 hours.
+                    </p>
+                  </div>
 
                   <button
-                    onClick={onClose}
-                    className="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs"
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-orange-500/20 hover:brightness-105 active:scale-98 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    Close & Keep Browsing
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Transmitting to Studio Server...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Submit Project Brief for Quotation Approval</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
                   </button>
+                </form>
+              )}
+
+              {/* SUCCESS STATE */}
+              {submissionSuccess && (
+                <div className="p-6 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-center space-y-4 animate-in zoom-in-95">
+                  <div className="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto shadow-lg">
+                    <CheckCircle2 className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
+                      Server Confirmed Delivery
+                    </span>
+                    <h4 className="text-lg font-black text-slate-900 mt-2">
+                      Project Brief Successfully Received
+                    </h4>
+                    <p className="text-xs text-slate-600 max-w-md mx-auto mt-1">
+                      {submissionSuccess.message}
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-white border border-emerald-200 inline-block text-xs font-mono font-bold text-slate-800">
+                    Reference ID: <span className="text-emerald-700">{submissionSuccess.referenceId}</span>
+                  </div>
+
+                  <div className="pt-2 flex justify-center gap-2">
+                    <button
+                      onClick={() => setActiveTab('blueprint')}
+                      className="py-2.5 px-4 rounded-xl bg-slate-900 text-white font-bold text-xs"
+                    >
+                      View Full Submitted Dossier
+                    </button>
+                    <button
+                      onClick={onClose}
+                      className="py-2.5 px-4 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100"
+                    >
+                      Done & Return to Site
+                    </button>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          )}
+
+          {/* ===================================================================
+              TAB 2: STRUCTURED PROJECT BRIEF DOSSIER (Honest, Real Answers Only)
+              =================================================================== */}
+          {activeTab === 'blueprint' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div>
+                  <h4 className="text-base font-extrabold text-slate-900">
+                    Project Blueprint Dossier
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    {projectBrief.serverConfirmed 
+                      ? 'Officially recorded and queued for engineering review' 
+                      : 'Draft brief — review your captured inputs below'}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
+                    projectBrief.serverConfirmed 
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
+                      : 'bg-amber-100 text-amber-800 border border-amber-300'
+                  }`}>
+                    {projectBrief.serverConfirmed ? 'Confirmed by Studio Server' : 'Draft in Progress'}
+                  </span>
                 </div>
               </div>
-            )}
 
-          </div>
-        )}
+              {/* Dossier Fields */}
+              <div className="space-y-3">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
+                    Core Specifications
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-slate-500">Primary Goal:</span>
+                      <p className="font-bold text-slate-900">{projectBrief.goalTitle || 'Not selected yet'}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">Industry / Sector:</span>
+                      <p className="font-bold text-slate-900">{projectBrief.industryName || projectBrief.customIndustryName || 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">Target Budget:</span>
+                      <p className="font-bold text-slate-900">{projectBrief.indicativeBudget || 'To be scoped with team'}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">Estimated Timeline:</span>
+                      <p className="font-bold text-slate-900">{projectBrief.estimatedTimeline || 'Standard 2–3 Weeks'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Essential Features */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
+                    Required Functional Capabilities ({projectBrief.essentialFeatures.length}):
+                  </span>
+                  {projectBrief.essentialFeatures.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {projectBrief.essentialFeatures.map((f, i) => (
+                        <span key={i} className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-800 text-xs font-medium flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>{f}</span>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 italic">No specific features selected yet.</p>
+                  )}
+                </div>
+
+                {/* Contact & Status */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
+                    Contact & Delivery Record
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-slate-500">Prospective Client:</span>
+                      <p className="font-bold text-slate-900">{projectBrief.clientName || 'Not provided yet'}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">Contact Method:</span>
+                      <p className="font-bold text-slate-900">{projectBrief.clientContact || 'Not provided yet'}</p>
+                    </div>
+                    {projectBrief.referenceId && (
+                      <div className="sm:col-span-2">
+                        <span className="text-slate-500">Server Reference ID:</span>
+                        <p className="font-mono font-bold text-emerald-700">{projectBrief.referenceId}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                {!projectBrief.serverConfirmed ? (
+                  <button
+                    onClick={() => {
+                      setActiveTab('guided');
+                      setConsultationStep(5);
+                    }}
+                    className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs shadow-md text-center hover:brightness-105 transition-all"
+                  >
+                    Complete & Submit This Brief →
+                  </button>
+                ) : (
+                  <button
+                    onClick={onClose}
+                    className="flex-1 py-3 px-4 rounded-xl bg-slate-900 text-white font-bold text-xs text-center hover:bg-slate-800 transition-colors"
+                  >
+                    Done • Quotation Under Founder Review
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    setActiveTab('guided');
+                    setConsultationStep(1);
+                  }}
+                  className="py-3 px-4 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition-colors"
+                >
+                  Edit Specifications
+                </button>
+              </div>
+
+            </div>
+          )}
+
+        </div>
 
       </div>
     </div>

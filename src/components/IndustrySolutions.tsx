@@ -247,21 +247,16 @@ export const IndustrySolutions: React.FC<IndustrySolutionsProps> = ({
                         href="#demos"
                         className="flex-1 py-2 px-3 rounded-xl bg-white text-slate-950 text-xs font-black flex items-center justify-center gap-1 hover:bg-slate-200 transition-colors shadow-md"
                       >
-                        <span>Try Live Demo</span>
+                        <span>View Concept Prototype</span>
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                       
-                      <a
-                        href={`https://wa.me/919999999999?text=${encodeURIComponent(
-                          `Hello Vismart Studio, I need a proposal for ${selectedSolution.name}.`
-                        )}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="py-2 px-4 rounded-xl bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1 hover:bg-emerald-500 shadow-md transition-all hover:scale-105"
+                      <button
+                        onClick={() => onOpenConsultation(selectedSolution.name)}
+                        className="py-2 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-xs font-black flex items-center justify-center gap-1 shadow-md transition-all hover:brightness-105"
                       >
-                        <MessageCircle className="w-3.5 h-3.5" />
-                        <span>WhatsApp</span>
-                      </a>
+                        <span>Discuss Brief</span>
+                      </button>
                     </div>
                   </div>
                 </div>

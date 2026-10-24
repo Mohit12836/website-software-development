@@ -19,13 +19,17 @@ import { SearchModal } from './components/SearchModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { NICHE_SOLUTIONS } from './data/agencyData';
 import type { NicheSolution, ServiceCategory } from './data/agencyData';
-import { MessageCircle } from 'lucide-react';
+import { INITIAL_PROJECT_BRIEF } from './data/projectBriefState';
+import type { ProjectBrief } from './data/projectBriefState';
 
 export function App() {
   const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
   const [isDark, setIsDark] = useState<boolean>(false);
   const [selectedSolution, setSelectedSolution] = useState<NicheSolution>(NICHE_SOLUTIONS[0]);
   
+  // Shared Unified Consultation & Project Brief State
+  const [projectBrief, setProjectBrief] = useState<ProjectBrief>(INITIAL_PROJECT_BRIEF);
+
   // Modals state
   const [consultationModalOpen, setConsultationModalOpen] = useState(false);
   const [consultationSubject, setConsultationSubject] = useState<string>('');
@@ -111,6 +115,7 @@ export function App() {
         {/* 6. Free Digital Check (Website & Technical Flaw Scanner) */}
         <FreeDigitalCheck
           currency={currency}
+          onOpenAuditModal={() => setAuditModalOpen(true)}
           onOpenConsultation={(details) => handleOpenConsultation(details)}
         />
 
@@ -143,18 +148,7 @@ export function App() {
         onOpenAudit={() => setAuditModalOpen(true)}
       />
 
-      {/* Floating Desktop WhatsApp Button */}
-      <a
-        href="https://wa.me/919999999999?text=Hello%20Vismart%20Studio,%20I%20am%20interested%20in%20a%20website/app/AI%20automation%20proposal."
-        target="_blank"
-        rel="noreferrer"
-        className="hidden sm:flex fixed bottom-6 right-6 z-40 items-center gap-2 px-4 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-2xl hover:scale-105 active:scale-95 transition-all group"
-      >
-        <MessageCircle className="w-5 h-5 fill-current" />
-        <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-300">
-          Chat on WhatsApp
-        </span>
-      </a>
+
 
       {/* Native Mobile Bottom Navigation Bar */}
       <MobileBottomNav
@@ -163,8 +157,8 @@ export function App() {
 
       {/* Smooth White Attractive Welcome Popup (Closes into floating side icon) */}
       <SmartWelcomePopup
-        currency={currency}
         onOpenConsultationModal={(niche) => handleOpenConsultation(niche)}
+        currentBrief={projectBrief}
       />
 
       {/* Interactive Modals */}
@@ -173,6 +167,8 @@ export function App() {
         onClose={() => setConsultationModalOpen(false)}
         currency={currency}
         initialSubject={consultationSubject}
+        projectBrief={projectBrief}
+        setProjectBrief={setProjectBrief}
       />
 
       <AiAuditModal

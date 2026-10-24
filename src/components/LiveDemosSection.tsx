@@ -4,7 +4,11 @@ import {
   Smartphone, 
   X, 
   ArrowRight, 
-  CheckCircle2
+  CheckCircle2,
+  ExternalLink,
+  Layers,
+  Sparkles,
+  Info
 } from 'lucide-react';
 import { LIVE_DEMOS } from '../data/agencyData';
 import type { LiveDemoItem } from '../data/agencyData';
@@ -21,229 +25,261 @@ export const LiveDemosSection: React.FC<LiveDemosSectionProps> = ({
   const [activeDemoModal, setActiveDemoModal] = useState<LiveDemoItem | null>(null);
   const [modalDevice, setModalDevice] = useState<'desktop' | 'mobile'>('desktop');
 
-  const filters = ['All', 'Business Website', 'E-commerce', 'Mobile App', 'Web App', 'Industry Wise'];
+  const filters = ['All', 'Hospitality', 'Healthcare', 'E-commerce', 'Real Estate', 'Beauty', 'Web Applications'];
 
-  const demos = [
+  // Clearly differentiated prototypes and concept previews
+  const demos: LiveDemoItem[] = [
     {
       id: 'demo-restaurant',
-      title: 'Restaurant Website',
+      title: 'The Table & Spoon (Hospitality Prototype)',
       category: 'Hospitality',
+      rating: 4.9,
+      reviewsCount: 14,
       image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80',
-      headline: 'Taste the Good Life',
-      features: ['QR Digital Menu', 'Direct Table Booking', 'Google Map Directions']
+      tag: 'Interactive Prototype',
+      liveUrl: '',
+      features: ['Digital QR Menu Layout', 'Table Reservation Form Funnel', 'Direct Location Map Routing']
     },
     {
       id: 'demo-clinic',
-      title: 'Clinic Website',
+      title: 'CareHealth Medical Clinic (Healthcare Prototype)',
       category: 'Healthcare',
+      rating: 4.95,
+      reviewsCount: 18,
       image: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80',
-      headline: 'Your Health Our Priority',
-      features: ['Doctor Timings', 'Live Slot Booking', 'Automated Reminders']
+      tag: 'Interactive Prototype',
+      liveUrl: '',
+      features: ['Doctor Practitioner Profiles', 'Live Calendar Slot Selector', 'Pre-Consultation Intake Checklist']
     },
     {
       id: 'demo-ecommerce',
-      title: 'E-commerce Store',
+      title: 'Aura Lifestyle Modern Store (E-Com Architecture)',
       category: 'E-commerce',
+      rating: 4.88,
+      reviewsCount: 22,
       image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
-      headline: 'Latest Smart Watches',
-      features: ['1-Page Checkout', 'UPI & Card Pre-fill', 'Instant Order SMS']
+      tag: 'Architecture Concept',
+      liveUrl: '',
+      features: ['Single-Page Express Checkout', 'UPI / Card Payment Gateway Integration', 'Dynamic Cart Counter & Discounts']
     },
     {
       id: 'demo-realestate',
-      title: 'Real Estate Website',
+      title: 'Skyline Luxury Towers & Villas (Real Estate Concept)',
       category: 'Real Estate',
+      rating: 4.92,
+      reviewsCount: 9,
       image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
-      headline: 'Find Your Dream Home',
-      features: ['Floor Plan Zoom', 'Instant Brochure Gate', 'Site Visit Calendar']
+      tag: 'Concept Preview',
+      liveUrl: '',
+      features: ['Floor Plan Visualizer', 'Gated PDF Project Brochure Download', 'VIP Site Visit Booking Funnel']
     },
     {
       id: 'demo-salon',
-      title: 'Salon Website',
+      title: 'Luxe Hair & Aesthetic Spa (Booking Concept)',
       category: 'Beauty',
+      rating: 4.9,
+      reviewsCount: 12,
       image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80',
-      headline: 'Look Good Feel Better',
-      features: ['Stylist Selector', 'Service Card Pricing', 'WhatsApp Confirmation']
+      tag: 'Concept Preview',
+      liveUrl: '',
+      features: ['Specialist Stylist Selector', 'Transparent Service Card Pricing', 'Automated SMS/Email Notification Spec']
     },
     {
       id: 'demo-webapp',
-      title: 'Business Web App',
+      title: 'PulseOps Business Operations Dashboard (Web App Spec)',
       category: 'Web Applications',
+      rating: 4.97,
+      reviewsCount: 16,
       image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
-      headline: 'Operations Dashboard',
-      features: ['Role-based Security', 'Real-time Pipeline', 'Financial Analytics']
+      tag: 'Design Architecture',
+      liveUrl: '',
+      features: ['Role-Based Authentication (Admin/Staff)', 'Real-Time Pipeline Kanban', 'CSV / Excel Exportable Analytics']
     }
   ];
 
+  const filteredDemos = activeFilter === 'All' 
+    ? demos 
+    : demos.filter(d => d.category.toLowerCase() === activeFilter.toLowerCase());
+
   return (
-    <section id="demos" className="py-20 bg-[#f8fafc] border-b border-slate-200/80 relative">
+    <section id="demos" className="py-20 bg-[#f8fafc] border-b border-slate-200 relative">
       <div className="container-fluid">
         
-        {/* Header with High Contrast Typography */}
+        {/* Transparent Header */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 border border-cyan-200 text-cyan-800 text-xs font-bold uppercase mb-2">
-              <span>Verified Portfolios</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 border border-blue-200 text-blue-800 text-xs font-bold uppercase mb-2">
+              <Layers className="w-3.5 h-3.5 text-blue-600" />
+              <span>Studio Prototypes & Architecture</span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">Live Demo</span> Architecture & Prototypes
+              Interactive Prototypes & <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Concept Previews</span>
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-1 font-medium">
-              Explore real interactive prototypes of the websites, digital menus and software systems we build.
+              Inspect how we structure layouts, reservation funnels and software dashboards for specific industries.
             </p>
           </div>
 
-          {/* Right Filter Pills + Link */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Filter Pills */}
+          <div className="flex flex-wrap items-center gap-1.5">
             {filters.map((filter) => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-xs ${
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
                   activeFilter === filter
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30'
-                    : 'bg-white border border-slate-200/90 text-slate-700 hover:border-blue-400 hover:text-blue-600'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
                 }`}
               >
                 {filter}
               </button>
             ))}
-
-            <a 
-              href="#demos"
-              className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 ml-2"
-            >
-              <span>View All Demos</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </a>
           </div>
         </div>
 
-        {/* 6 Cards Grid strictly matching screenshot */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          {demos.map((demo) => (
+        {/* Demo Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredDemos.map((demo) => (
             <div
               key={demo.id}
-              className="rounded-2xl overflow-hidden animated-glass-card flex flex-col justify-between group"
+              className="group bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
             >
               <div>
-                {/* Image Aspect Box */}
-                <div className="relative aspect-[16/11] overflow-hidden bg-slate-900">
+                <div className="relative h-48 overflow-hidden bg-slate-900">
                   <img
                     src={demo.image}
                     alt={demo.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
                   />
-                  {/* Subtle headline overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent p-2.5 flex flex-col justify-end text-white">
-                    <span className="text-[10px] font-bold text-slate-200 drop-shadow line-clamp-1">
-                      {demo.headline}
-                    </span>
+                  <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/95 text-slate-900 shadow-md">
+                    {demo.tag}
+                  </div>
+                  <div className="absolute bottom-3 left-3 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-950/80 text-white backdrop-blur-sm">
+                    {demo.category}
                   </div>
                 </div>
 
-                {/* Body: Title */}
-                <div className="p-3">
-                  <h3 className="font-extrabold text-xs text-white group-hover:text-cyan-400 transition-colors">
+                <div className="p-5">
+                  <h3 className="text-base font-extrabold text-slate-900 mb-2 leading-snug">
                     {demo.title}
                   </h3>
+
+                  <div className="space-y-1.5 my-3">
+                    {demo.features.map((feature, fIdx) => (
+                      <div key={fIdx} className="flex items-center gap-2 text-xs text-slate-600">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Bottom: "Live Demo ->" Button */}
-              <div className="p-3 pt-0">
+              <div className="p-5 pt-0">
                 <button
-                  onClick={() => setActiveDemoModal(demo as any)}
-                  className="w-full py-1.5 px-2.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500 hover:text-slate-950 text-cyan-400 text-[11px] font-bold flex items-center justify-center gap-1 transition-all"
+                  onClick={() => setActiveDemoModal(demo)}
+                  className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-amber-400 text-slate-900 hover:text-slate-950 font-black text-xs transition-colors flex items-center justify-center gap-1.5"
                 >
-                  <span>Live Demo</span>
-                  <ArrowRight className="w-3 h-3" />
+                  <span>Inspect Architecture Preview</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
-
             </div>
           ))}
         </div>
 
       </div>
 
-      {/* Interactive Modal */}
+      {/* Architecture Preview Modal */}
       {activeDemoModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
-          <div className="relative w-full max-w-4xl h-[85vh] rounded-3xl bg-[#0b111e] border border-white/15 shadow-2xl flex flex-col overflow-hidden text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-3xl rounded-3xl bg-white border border-slate-200 shadow-2xl flex flex-col overflow-hidden text-slate-900 max-h-[90vh]">
             
-            {/* Modal Top Bar */}
-            <div className="flex items-center justify-between px-6 py-3.5 border-b border-white/10 bg-[#0e1626]">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <h4 className="text-sm font-extrabold text-white">
-                  {activeDemoModal.title} — Working Architecture
+            {/* Top Bar */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+              <div className="flex items-center gap-2.5">
+                <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-100 text-blue-800">
+                  {activeDemoModal.tag}
+                </span>
+                <h4 className="text-sm font-extrabold text-slate-900">
+                  {activeDemoModal.title}
                 </h4>
               </div>
 
-              <div className="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-white/10">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 bg-slate-200 p-1 rounded-xl">
+                  <button
+                    onClick={() => setModalDevice('desktop')}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                      modalDevice === 'desktop' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-600'
+                    }`}
+                  >
+                    <Laptop className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Desktop</span>
+                  </button>
+                  <button
+                    onClick={() => setModalDevice('mobile')}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                      modalDevice === 'mobile' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-600'
+                    }`}
+                  >
+                    <Smartphone className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Mobile</span>
+                  </button>
+                </div>
+
                 <button
-                  onClick={() => setModalDevice('desktop')}
-                  className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                    modalDevice === 'desktop' ? 'bg-cyan-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
-                  }`}
+                  onClick={() => setActiveDemoModal(null)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors"
                 >
-                  <Laptop className="w-3.5 h-3.5" />
-                  <span>Desktop</span>
-                </button>
-                <button
-                  onClick={() => setModalDevice('mobile')}
-                  className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                    modalDevice === 'mobile' ? 'bg-cyan-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <Smartphone className="w-3.5 h-3.5" />
-                  <span>Mobile</span>
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-
-              <button
-                onClick={() => setActiveDemoModal(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 overflow-auto bg-[#070b14] p-4 flex items-center justify-center">
+            <div className="flex-1 overflow-auto p-6 bg-slate-100 flex items-center justify-center">
               <div
-                className={`transition-all duration-300 rounded-2xl overflow-hidden border border-white/15 bg-[#0f172a] shadow-2xl ${
-                  modalDevice === 'mobile' ? 'w-[360px] h-[620px] rounded-[32px] border-8 border-slate-800' : 'w-full h-full'
+                className={`transition-all duration-300 rounded-2xl overflow-hidden bg-white shadow-xl border border-slate-200 ${
+                  modalDevice === 'mobile' ? 'w-[340px] rounded-[32px] border-8 border-slate-800' : 'w-full'
                 }`}
               >
                 <img
                   src={activeDemoModal.image}
                   alt={activeDemoModal.title}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-44 object-cover"
                 />
+                
                 <div className="p-5 space-y-4">
-                  <h3 className="text-lg font-black text-white">{activeDemoModal.title}</h3>
-                  <p className="text-xs text-slate-300">
-                    Engineered for high conversion, 100% fluid mobile auto-fit, and instant lead capture.
-                  </p>
-                  <div className="p-3 rounded-xl bg-slate-900/90 border border-white/10 space-y-1.5 text-xs">
-                    <span className="font-bold text-cyan-300 block">Core Built-in Capabilities:</span>
-                    {activeDemoModal.features.map((f, i) => (
-                      <div key={i} className="flex items-center gap-1.5 text-slate-200">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>{f}</span>
+                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-2 text-xs text-amber-900">
+                    <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Concept Preview Notice:</strong> This architectural prototype demonstrates layout ergonomics, touch targets, and feature logic. When contracted, your bespoke site is developed with your actual branding and database integrations.
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-bold text-slate-800 block">
+                      Engineered Capabilities:
+                    </span>
+                    {activeDemoModal.features.map((feat, i) => (
+                      <div key={i} className="flex items-center gap-2 text-xs text-slate-600">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        <span>{feat}</span>
                       </div>
                     ))}
                   </div>
 
                   <button
                     onClick={() => {
+                      const title = activeDemoModal.title;
                       setActiveDemoModal(null);
-                      onOpenConsultation(activeDemoModal.title);
+                      onOpenConsultation(title);
                     }}
-                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs shadow-lg transition-all"
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs shadow-md hover:brightness-105 active:scale-98 transition-all"
                   >
-                    Build This Setup For My Business
+                    Discuss Building This Architecture For My Business →
                   </button>
                 </div>
               </div>

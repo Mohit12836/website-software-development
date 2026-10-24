@@ -259,23 +259,9 @@ export const AiRecommendationWidget: React.FC<AiRecommendationWidgetProps> = ({
                   onClick={() => onSelectSolution(currentSolution)}
                   className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white font-black text-xs hover:scale-102 active:scale-98 transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-orange-500/25"
                 >
-                  <span>Explore This Solution</span>
+                  <span>Discuss This Blueprint</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
-
-                <a
-                  href={`https://wa.me/919999999999?text=${encodeURIComponent(
-                    `Hello Vismart Studio, I used the Solution Finder for ${currentSolution.name}. Selected Goal: ${selectedGoal}. Target Budget: ${
-                      currency === 'INR' ? tailoredPlan.priceInr : tailoredPlan.priceUsd
-                    }. Please share project timeline.`
-                  )}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all hover:scale-102"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>WhatsApp Quote</span>
-                </a>
               </div>
 
             </div>

@@ -1,107 +1,120 @@
 import React from 'react';
-import { Star, ShieldCheck, Quote, Sparkles } from 'lucide-react';
+import { Star, ShieldCheck, Quote, Sparkles, AlertCircle } from 'lucide-react';
 
 export const ReviewsSection: React.FC = () => {
-  const reviews = [
+  // Honest Case Study Models: Accurately labeled as Studio Design Systems & Production Case Prototypes
+  const clientArchitectures = [
     {
-      name: 'Rajesh Varma',
-      role: 'Owner, The Royal Biryani & Cafe',
-      location: 'New Delhi, India',
-      rating: 5,
-      comment: 'Swiggy aur Zomato par 30% commission jaata tha. Vismart Studio ne humara QR Digital Menu aur WhatsApp direct table reservation lagaya. 2 mahine mein humara direct orders 40% badh gaya aur monthly commission mein ₹45,000 bacha!',
-      metric: '₹45,000/mo Commission Saved',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80'
+      title: 'Hospitality & QR Ordering Model',
+      sector: 'Restaurant & Dining Architecture',
+      highlights: [
+        'Eliminates aggregator order commissions via direct online ordering',
+        'Mobile QR menu with zero-latency category switching',
+        'Direct table reservation funnel with automated confirmation dispatch'
+      ],
+      deliverable: 'Delivered as Full-Stack React / Next.js Custom Build',
+      designScope: 'Menu Design, Table Booking Logic, Location Geocoding'
     },
     {
-      name: 'Dr. Ananya Sharma',
-      role: 'Founder, CareDental Specialists',
-      location: 'Bangalore, India',
-      rating: 5,
-      comment: 'Patients ko appointment ke liye clinic call karna padta tha aur reception par bohot chaos tha. Inhone live slot calendar aur auto WhatsApp reminder setup kiya. No-shows 40% kam ho gaye aur patient booking 24/7 chalti hai!',
-      metric: '40% Drop in Patient No-Shows',
-      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=150&q=80'
+      title: 'Healthcare & Patient Slot Calendar',
+      sector: 'Specialist Clinic & Healthcare',
+      highlights: [
+        'Solves reception bottleneck through real-time slot availability',
+        'Automated appointment pre-alert notifications',
+        'Zero-confusion fee disclosure & practitioner credential cards'
+      ],
+      deliverable: 'HIPAA/Privacy-Conscious Booking Engine Architecture',
+      designScope: 'Doctor Schedule Management & Mobile Calendar Integration'
     },
     {
-      name: 'Mark Henderson',
-      role: 'Operations Director, Apex HVAC & Roofing',
-      location: 'Dallas, Texas, USA',
-      rating: 5,
-      comment: 'Most web designers just give you a static brochure. Vismart Studio built a zip-code based emergency quote funnel. Within 3 weeks of launch, our inbound emergency HVAC service calls doubled. Their attention to US mobile UX is top tier.',
-      metric: '2.4x Emergency Service Calls',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80'
+      title: 'Emergency Service Dispatch Funnel',
+      sector: 'Trade Contractors (HVAC, Electrical, Roofing)',
+      highlights: [
+        'Zip-code validated emergency quote estimator',
+        'Instant tap-to-call mobile ergonomics for urgent homeowner repairs',
+        'Trust-engineered licensing, insurance and review verification displays'
+      ],
+      deliverable: 'US & Global High-Conversion Lead Engine',
+      designScope: 'Service Area Mapping & Dynamic Estimate Calculation'
     },
     {
-      name: 'Suresh Singhania',
-      role: 'Managing Director, Singhania Polymers & B2B',
-      location: 'Ahmedabad, Gujarat',
-      rating: 5,
-      comment: 'Humara B2B catalogue aur Request for Quote (RFQ) system inhone 15 din mein live kiya. Ab UAE aur Africa ke distributors directly specifications download karke bulk quotation mangte hain. Outstanding ROI!',
-      metric: '₹85 Lakhs B2B Inquiries Generated',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80'
+      title: 'B2B Wholesale & Specification RFQ',
+      sector: 'Industrial Manufacturing & Polymers',
+      highlights: [
+        'Direct technical datasheet & PDF specification downloads',
+        'Tiered Request For Quotation (RFQ) inquiry capture with MOQ rules',
+        'Multi-currency export inquiry routing for international buyers'
+      ],
+      deliverable: 'Enterprise B2B Product Catalogue Architecture',
+      designScope: 'High-Volume SKU Catalog & Secure Quotation Intake'
     }
   ];
 
   return (
-    <section id="reviews" className="py-24 bg-[#f1f5f9] relative overflow-hidden border-b border-slate-200/80">
+    <section id="reviews" className="py-24 bg-[#f8fafc] relative overflow-hidden border-b border-slate-200">
       <div className="container-fluid relative z-10">
         
-        {/* Header with High Contrast Typography */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-bold uppercase mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Proven Business Outcomes</span>
+        {/* Transparent, Honest Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold uppercase mb-3">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <span>Engineered Architecture & Case Studies</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight">
-            Backed by <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-blue-600">500+ Business Owners</span>
+            How Vismart Studio Solves <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Core Business Bottlenecks</span>
           </h2>
-          <p className="mt-2 text-sm text-slate-600">
-            Read how businesses in India and the USA transformed their websites from expensive brochure costs into revenue generating engines.
+          <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed">
+            Every business problem is different. Below are genuine architectural blueprints showing how our digital platforms replace slow brochure sites with real operational outcomes.
           </p>
+
+          <div className="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200 inline-flex items-center gap-2 text-xs text-amber-900 text-left max-w-xl">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>
+              <strong>Transparency Note:</strong> As an engineering studio, we present verifiable architectural outcomes and technical deliverables rather than unverified third-party vanity ratings.
+            </span>
+          </div>
         </div>
 
-        {/* Reviews Grid */}
+        {/* Real Architectural Case Studies Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {reviews.map((rev, idx) => (
+          {clientArchitectures.map((item, idx) => (
             <div
               key={idx}
-              className="animated-glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-between"
+              className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
             >
               <div>
-                {/* Rating & Metric Tag */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-1 text-amber-400">
-                    {[...Array(rev.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-current" />
-                    ))}
-                  </div>
-                  <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-500/30">
-                    {rev.metric}
+                <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                  <span className="text-xs font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">
+                    {item.sector}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-500">
+                    Production Architecture
                   </span>
                 </div>
 
-                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal italic">
-                  "{rev.comment}"
-                </p>
+                <h3 className="text-base sm:text-lg font-black text-slate-900 mb-3">
+                  {item.title}
+                </h3>
+
+                <ul className="space-y-2 mb-6">
+                  {item.highlights.map((h, hIdx) => (
+                    <li key={hIdx} className="flex items-start gap-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-2"></span>
+                      <span>{h}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
-              {/* Author info */}
-              <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-3">
-                <img
-                  src={rev.avatar}
-                  alt={rev.name}
-                  className="w-11 h-11 rounded-full object-cover border-2 border-cyan-400/50"
-                />
+              <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500">
                 <div>
-                  <h4 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
-                    {rev.name}
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  </h4>
-                  <p className="text-[11px] text-slate-400">
-                    {rev.role} • <span className="font-semibold text-cyan-300">{rev.location}</span>
-                  </p>
+                  <span className="font-semibold text-slate-700 block">Deliverable:</span>
+                  <span>{item.deliverable}</span>
+                </div>
+                <div className="text-slate-400 text-[11px]">
+                  {item.designScope}
                 </div>
               </div>
-
             </div>
           ))}
         </div>
