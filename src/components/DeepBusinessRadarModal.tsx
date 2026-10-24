@@ -176,7 +176,7 @@ export const DeepBusinessRadarModal: React.FC<DeepBusinessRadarModalProps> = ({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-4">
           
           {/* =========================================================================
               PART 1: SLIDE-BY-SLIDE DIAGNOSIS (One Question at a Time, Side-by-Side Cards)

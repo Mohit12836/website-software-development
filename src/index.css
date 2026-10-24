@@ -59,6 +59,23 @@
     padding-inline: clamp(0.85rem, 3.5vw, 2.5rem);
   }
 
+  /* Sleek modern dark scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 9999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.4);
+    border-radius: 9999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.6);
+  }
+
   /* ==========================================================================
      COSMIC HORIZON & ROCKY NEON TERRAIN LIGHTING
      ========================================================================== */
