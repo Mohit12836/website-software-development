@@ -8,6 +8,7 @@ import {
   Sparkles,
   CheckCircle2
 } from 'lucide-react';
+import { AnimatedCounter } from './AnimatedCounter';
 
 interface RoiCalculatorProps {
   currency: 'INR' | 'USD';
@@ -139,7 +140,12 @@ export const RoiCalculator: React.FC<RoiCalculatorProps> = ({
                 
                 <div className="mt-2">
                   <span className="text-3xl sm:text-4xl font-black text-rose-400">
-                    {formatCurrency(monthlyLeak)}
+                    <AnimatedCounter 
+                      value={monthlyLeak} 
+                      prefix={currency === 'INR' ? '₹' : '$'} 
+                      locale={currency === 'INR' ? 'en-IN' : 'en-US'}
+                      duration={600}
+                    />
                   </span>
                   <span className="text-xs text-slate-400 block mt-0.5">lost every single month</span>
                 </div>
@@ -147,11 +153,20 @@ export const RoiCalculator: React.FC<RoiCalculatorProps> = ({
                 <div className="mt-4 pt-4 border-t border-white/10 space-y-2 text-xs">
                   <div className="flex justify-between text-slate-300">
                     <span>Annual Revenue at Risk:</span>
-                    <strong className="text-white">{formatCurrency(annualLeak)}</strong>
+                    <strong className="text-white">
+                      <AnimatedCounter 
+                        value={annualLeak} 
+                        prefix={currency === 'INR' ? '₹' : '$'} 
+                        locale={currency === 'INR' ? 'en-IN' : 'en-US'}
+                        duration={600}
+                      />
+                    </strong>
                   </div>
                   <div className="flex justify-between text-slate-300">
                     <span>Staff Phone Time Wasted:</span>
-                    <strong className="text-amber-400">{hoursSavedWeekly} hours / week</strong>
+                    <strong className="text-amber-400">
+                      <AnimatedCounter value={hoursSavedWeekly} suffix=" hours / week" duration={500} />
+                    </strong>
                   </div>
                 </div>
 

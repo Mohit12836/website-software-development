@@ -10,6 +10,7 @@ import {
   Smartphone, 
   Cpu
 } from 'lucide-react';
+import { AnimatedCounter } from './AnimatedCounter';
 
 interface HeroSectionProps {
   currency: 'INR' | 'USD';
@@ -277,18 +278,24 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             {/* Divider line on desktop */}
             <div className="hidden md:block w-px h-10 bg-white/15"></div>
 
-            {/* Right Segment: 4 Balanced Key Stats */}
+            {/* Right Segment: 4 Balanced Key Stats with Smooth Number Animation */}
             <div className="md:col-span-4 grid grid-cols-4 gap-1.5 text-center pt-2 md:pt-0 border-t md:border-t-0 border-white/10">
               <div>
-                <span className="text-sm sm:text-lg font-black text-cyan-400 block leading-tight">500+</span>
+                <span className="text-sm sm:text-lg font-black text-cyan-400 block leading-tight">
+                  <AnimatedCounter value={500} suffix="+" duration={1800} />
+                </span>
                 <span className="text-[8px] sm:text-[9px] text-slate-400 uppercase font-semibold">Delivered</span>
               </div>
               <div>
-                <span className="text-sm sm:text-lg font-black text-fuchsia-400 block leading-tight">98%</span>
+                <span className="text-sm sm:text-lg font-black text-fuchsia-400 block leading-tight">
+                  <AnimatedCounter value={98} suffix="%" duration={1600} />
+                </span>
                 <span className="text-[8px] sm:text-[9px] text-slate-400 uppercase font-semibold">Satisfaction</span>
               </div>
               <div>
-                <span className="text-sm sm:text-lg font-black text-amber-400 block leading-tight">5+</span>
+                <span className="text-sm sm:text-lg font-black text-amber-400 block leading-tight">
+                  <AnimatedCounter value={5} suffix="+" duration={1200} />
+                </span>
                 <span className="text-[8px] sm:text-[9px] text-slate-400 uppercase font-semibold">Years</span>
               </div>
               <div>
