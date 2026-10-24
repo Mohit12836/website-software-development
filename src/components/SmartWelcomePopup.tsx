@@ -70,22 +70,22 @@ export const SmartWelcomePopup: React.FC<SmartWelcomePopupProps> = ({
           STATE 1: DOCKED FLOATING BADGE (Small, Unobtrusive, Bottom-Right)
           ========================================================================= */}
       {modalState === 'docked' && (
-        <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40 animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed bottom-20 sm:bottom-6 right-3 sm:right-6 z-40 animate-in fade-in zoom-in-95 duration-200">
           <button
             onClick={() => handleLaunchConsultation()}
-            className="group flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-white text-slate-900 shadow-2xl border-2 border-amber-400 hover:border-amber-500 hover:scale-105 active:scale-95 transition-all"
+            className="group flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-white text-slate-900 shadow-2xl border-2 border-amber-400 hover:border-amber-500 hover:scale-105 active:scale-95 transition-all"
             title="Open Project Consultation & Quotation"
           >
-            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-500 flex items-center justify-center text-slate-950 font-black text-xs shadow-sm">
-              <Compass className="w-4 h-4 text-slate-950" />
+            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-500 flex items-center justify-center text-slate-950 font-black text-xs shadow-sm shrink-0">
+              <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-950" />
             </div>
 
             <div className="text-left">
-              <span className="text-xs font-black text-slate-900 group-hover:text-amber-700 transition-colors block leading-tight">
-                Discuss My Project
+              <span className="text-[11px] sm:text-xs font-black text-slate-900 group-hover:text-amber-700 transition-colors block leading-tight">
+                Discuss Project
               </span>
-              <span className="text-[10px] text-slate-500 block">
-                {currentBrief?.goalTitle || 'Free Architectural Scoping'}
+              <span className="text-[9px] sm:text-[10px] text-slate-500 block truncate max-w-[120px] sm:max-w-none">
+                {currentBrief?.goalTitle || 'Free Scoping'}
               </span>
             </div>
           </button>

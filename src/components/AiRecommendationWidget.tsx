@@ -122,21 +122,21 @@ export const AiRecommendationWidget: React.FC<AiRecommendationWidgetProps> = ({
         </div>
 
         {/* The 2-Step Interactive Selector Container (Obsidian Glass Card on Light Canvas) */}
-        <div className="max-w-5xl mx-auto animated-glass-card rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+        <div className="max-w-5xl mx-auto animated-glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-8 lg:p-10 shadow-2xl relative overflow-hidden">
           
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
             
             {/* Left Column: 2-Step Interactive Picker (7 cols) */}
-            <div className="lg:col-span-7 space-y-6">
+            <div className="lg:col-span-7 space-y-5 sm:space-y-6">
               
               {/* Step 1: Select Your Business */}
               <div>
-                <label className="flex items-center gap-2 text-xs font-black text-amber-400 uppercase tracking-wider mb-3">
-                  <span className="w-5 h-5 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center text-[10px]">1</span>
-                  <span>Select Your Business (अपना बिज़नेस चुनें):</span>
+                <label className="flex items-center gap-2 text-xs font-black text-amber-400 uppercase tracking-wider mb-2.5 sm:mb-3">
+                  <span className="w-5 h-5 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center text-[10px] font-black shrink-0">1</span>
+                  <span className="truncate">Select Your Business (अपना बिज़नेस चुनें):</span>
                 </label>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
                   {businessTypes.map((biz) => {
                     const Icon = biz.icon;
                     const isSelected = selectedNicheId === biz.id;
