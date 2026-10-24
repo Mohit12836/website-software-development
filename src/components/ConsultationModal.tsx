@@ -466,17 +466,19 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                         <div
                           key={fIdx}
                           onClick={() => handleToggleFeature(feature)}
-                          className={`p-3 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between ${
+                          className={`p-3.5 rounded-xl border-2 transition-all duration-200 cursor-pointer flex items-center justify-between select-none ${
                             isChecked 
-                              ? 'border-amber-500 bg-amber-50/60 text-slate-900 font-bold' 
-                              : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                              ? "border-emerald-600 bg-emerald-50 text-emerald-950 font-bold shadow-md shadow-emerald-600/15 selected-pop-green ring-1 ring-emerald-600" 
+                              : "border-slate-300 bg-white text-slate-950 hover:border-emerald-500 hover:bg-slate-50 shadow-sm"
                           }`}
                         >
-                          <span className="text-xs leading-snug">{feature}</span>
-                          <div className={`w-4 h-4 rounded flex items-center justify-center border shrink-0 ml-2 ${
-                            isChecked ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-300'
+                          <span className={`text-xs sm:text-[13px] leading-snug ${
+                            isChecked ? "text-emerald-950 font-extrabold" : "text-slate-950 font-bold"
+                          }`}>{feature}</span>
+                          <div className={`w-5 h-5 rounded-md flex items-center justify-center border-2 shrink-0 ml-2.5 transition-colors duration-200 ${
+                            isChecked ? "bg-emerald-600 border-emerald-600 text-white shadow-sm" : "border-slate-400 bg-slate-100"
                           }`}>
-                            {isChecked && <Check className="w-3 h-3" />}
+                            {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                           </div>
                         </div>
                       );
@@ -536,10 +538,10 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                           key={bIdx}
                           type="button"
                           onClick={() => handleSelectBudget(bTier)}
-                          className={`p-3 rounded-xl border-2 text-left text-xs transition-all ${
+                          className={`p-3 rounded-xl border-2 text-left text-xs transition-all duration-200 ${
                             projectBrief.indicativeBudget === bTier 
-                              ? 'border-amber-500 bg-amber-50 font-bold text-slate-900' 
-                              : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                              ? 'border-emerald-600 bg-emerald-50 font-extrabold text-emerald-950 shadow-md ring-1 ring-emerald-600 selected-pop-green' 
+                              : 'border-slate-300 bg-white text-slate-950 font-bold hover:border-emerald-500 hover:bg-slate-50 shadow-sm'
                           }`}
                         >
                           {bTier}
@@ -563,10 +565,10 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                           key={tIdx}
                           type="button"
                           onClick={() => handleSelectTimeline(tOpt)}
-                          className={`p-3 rounded-xl border-2 text-left text-xs transition-all ${
+                          className={`p-3 rounded-xl border-2 text-left text-xs transition-all duration-200 ${
                             projectBrief.estimatedTimeline === tOpt 
-                              ? 'border-amber-500 bg-amber-50 font-bold text-slate-900' 
-                              : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                              ? 'border-emerald-600 bg-emerald-50 font-extrabold text-emerald-950 shadow-md ring-1 ring-emerald-600 selected-pop-green' 
+                              : 'border-slate-300 bg-white text-slate-950 font-bold hover:border-emerald-500 hover:bg-slate-50 shadow-sm'
                           }`}
                         >
                           {tOpt}
