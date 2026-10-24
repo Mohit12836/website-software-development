@@ -13,6 +13,7 @@ import { RoiCalculator } from './components/RoiCalculator';
 import { ReviewsSection } from './components/ReviewsSection';
 import { Footer } from './components/Footer';
 import { ConsultationModal } from './components/ConsultationModal';
+import { SmartWelcomeAssistant } from './components/SmartWelcomeAssistant';
 import { AiAuditModal } from './components/AiAuditModal';
 import { SearchModal } from './components/SearchModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
@@ -158,6 +159,12 @@ export function App() {
       {/* Native Mobile Bottom Navigation Bar */}
       <MobileBottomNav
         onOpenConsultation={() => handleOpenConsultation()}
+      />
+
+      {/* Smart Welcome Assistant (Progressive Discovery: Bubble -> Pill -> Docked Panel) */}
+      <SmartWelcomeAssistant
+        currency={currency}
+        onOpenConsultationModal={(niche) => handleOpenConsultation(niche)}
       />
 
       {/* Interactive Modals */}
