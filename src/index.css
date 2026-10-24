@@ -416,4 +416,47 @@
       radial-gradient(ellipse 80% 40% at 50% 90%, rgba(14, 165, 233, 0.25) 0%, rgba(236, 72, 153, 0.2) 40%, transparent 70%),
       linear-gradient(180deg, transparent 0%, rgba(8, 14, 28, 0.9) 60%, #060913 100%);
   }
+
+  /* ==========================================================================
+     SMOOTH WHITE POPUP & FLOATING DOCKED LAUNCHER (Vismart Journey Modal)
+     ========================================================================== */
+  @keyframes smooth-popup-open {
+    0% {
+      opacity: 0;
+      transform: scale(0.92) translateY(24px);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.015) translateY(-2px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6);
+    }
+    70% {
+      transform: scale(1);
+      box-shadow: 0 0 0 14px rgba(245, 158, 11, 0);
+    }
+    100% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+    }
+  }
+
+  .smooth-white-popup {
+    animation: smooth-popup-open 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
+  }
+
+  .pulse-gold-ring {
+    animation: pulse-ring 2.4s infinite;
+  }
 }
+

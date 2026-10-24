@@ -13,7 +13,7 @@ import { RoiCalculator } from './components/RoiCalculator';
 import { ReviewsSection } from './components/ReviewsSection';
 import { Footer } from './components/Footer';
 import { ConsultationModal } from './components/ConsultationModal';
-import { SmartWelcomeAssistant } from './components/SmartWelcomeAssistant';
+import { SmartWelcomePopup } from './components/SmartWelcomePopup';
 import { AiAuditModal } from './components/AiAuditModal';
 import { SearchModal } from './components/SearchModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
@@ -161,8 +161,8 @@ export function App() {
         onOpenConsultation={() => handleOpenConsultation()}
       />
 
-      {/* Smart Welcome Assistant (Progressive Discovery: Bubble -> Pill -> Docked Panel) */}
-      <SmartWelcomeAssistant
+      {/* Smooth White Attractive Welcome Popup (Closes into floating side icon) */}
+      <SmartWelcomePopup
         currency={currency}
         onOpenConsultationModal={(niche) => handleOpenConsultation(niche)}
       />
